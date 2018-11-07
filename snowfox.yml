@@ -3,7 +3,7 @@ version: '2'
 services:
 ################################################################################
 #
-# the CAN Interfaces for Snowfox need an odsupercomponent.
+# The CAN Interfaces for Snowfox need an odsupercomponent.
 #
 ################################################################################
 
@@ -21,7 +21,7 @@ services:
 #
 ######################################################################################
    
-   # RTK Corrections for Applanix (needs update)
+    # RTK Corrections for Applanix (needs update)
 #    dlv-ntrip:
 #        image: copplar.cse.chalmers.se:5043/chalmersrevere/dlv-ntrip
 #        restart: on-failure
@@ -42,7 +42,7 @@ services:
        network_mode: "host"
        command: "--hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=110"
 
- 	# Accessing a video stream using OpenCV (Axis 10.42.42.12)
+    # Accessing a video stream using OpenCV (Axis 10.42.42.12)
     dev-camera-opencv:
         image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
         restart: always
@@ -52,7 +52,7 @@ services:
         - /tmp:/tmp
         command: "--camera=http://root:pass@10.42.42.12/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=640 --height=480 --freq=20 --name.i420=video0.i420 --name.argb=video0.argb"
 
- 	# Encoder for camera-opencv(x264)
+    # Encoder for camera-opencv(x264)
     # x264(for research) has the better performance
     video-x264-encoder-amd64:
         build:
@@ -97,7 +97,7 @@ services:
 
 ######## NOTE: To make steering sluggish, reduce steering_max_rate i.e. 0 < steering_max_rate < 2  
 
-	# Web-application for viewing vehicle data.
+    # Web-application for viewing vehicle data.
     vehicle-view:
         container_name: opendlv-vehicle-view
         image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.44
@@ -131,7 +131,7 @@ services:
 #        - /tmp:/tmp
 #       command: "--cid=110 --name=video0.i420 --width=640 --height=480"
 
- 	# Encoder for camera-opencv(vp8)
+    # Encoder for camera-opencv(vp8)
 #    video-vpx-encoder:
 #        image: chalmersrevere/opendlv-video-vpx-encoder-multi:v0.0.5
 #        restart: on-failure
@@ -158,7 +158,7 @@ services:
 #        network_mode: "host"
 #        command: "--nmea_ip=10.42.42.23 --nmea_port=9999 --cid=110"
         
-	# Convert video data into images.
+    # Convert video data into images.
 #	rec2csv_png:
 #        build:
 #            context: https://github.com/chalmers-revere/rec2csv-png.git
