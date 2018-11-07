@@ -84,7 +84,7 @@ services:
 #        devices:
 #        - "/dev/input/js0:/dev/input/js0"
 #        command: "--device=/dev/input/js0 --axis_leftright=0 --axis_updown=3 --freq=100 --acc_min=0 --acc_max=50 --dec_min=0 --dec_max=-10 --steering_min=-10 --steering_max=10 --steering_max_rate=2.0 --cid=110"
-	
+
     # PS4 controller
 #    dev-ps4controller:
 #        container_name: dev-ps4controller
