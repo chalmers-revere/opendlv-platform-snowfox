@@ -42,4 +42,4 @@ sed -i "$sed_arg" setup-post-09-socketcan.sh
 
 chmod +r *.sh
 
-sh install.sh
+su -c ./install.sh -s /bin/bash root
