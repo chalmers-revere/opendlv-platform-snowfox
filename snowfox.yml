@@ -35,14 +35,14 @@ services:
         network_mode: "host"
         command: "--pos_ip=10.42.42.40 --pos_port=5602 --cid=110"
 
-    # Velodyne HDL32 Lidar (10.42.42.13)
+    # Velodyne HDL32 Lidar (10.42.42.70)
     dev-lidar-hdl32e:
        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.10
        restart: always
        network_mode: "host"
        command: "--hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=110"
 
-    # Accessing a video stream using OpenCV (Axis 10.42.42.12)
+    # Accessing a video stream using OpenCV (Axis 10.42.42.50)
     dev-camera-opencv:
         image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
         restart: always
@@ -50,7 +50,7 @@ services:
         network_mode: "host"
         volumes:
         - /tmp:/tmp
-        command: "--camera=http://root:pass@10.42.42.12/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=640 --height=480 --freq=20 --name.i420=video0.i420 --name.argb=video0.argb"
+        command: "--camera=http://root:pass@10.42.42.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=640 --height=480 --freq=20 --name.i420=video0.i420 --name.argb=video0.argb"
 
     # Encoder for camera-opencv(x264)
     # x264(for research) has the better performance
