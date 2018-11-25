@@ -195,7 +195,7 @@ services:
     # Trimble GPS
 #    dev-gps-nmea:
 #        container_name: dev-gps-nmea
-#        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.12
+#        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
 #        restart: on-failure
 #        network_mode: "host"
 #        cap_add:
