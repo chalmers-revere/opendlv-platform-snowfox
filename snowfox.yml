@@ -36,7 +36,7 @@ services:
     # Applanix GPS (10.42.42.40)
     dev-gps-pos:
         container_name: dev-gps-pos
-        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.6
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.7
         restart: always
         network_mode: "host"
         cap_add:
@@ -125,7 +125,7 @@ services:
     # Web-application for viewing vehicle data.
     vehicle-view:
         container_name: opendlv-vehicle-view
-        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.44
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.45
         restart: always
         network_mode: "host"
         volumes:
@@ -195,7 +195,7 @@ services:
     # Trimble GPS
 #    dev-gps-nmea:
 #        container_name: dev-gps-nmea
-#        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.9
+#        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
 #        restart: on-failure
 #        network_mode: "host"
 #        cap_add:
