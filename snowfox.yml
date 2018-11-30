@@ -125,7 +125,7 @@ services:
     # Web-application for viewing vehicle data.
     vehicle-view:
         container_name: opendlv-vehicle-view
-        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.47
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.48
         restart: always
         network_mode: "host"
         volumes:
