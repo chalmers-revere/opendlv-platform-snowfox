@@ -89,7 +89,7 @@ services:
     # CAN interface to access Snowfox.
     proxy-xc90:
         container_name: proxy-xc90
-        image: 
+        image:
         restart: on-failure
         network_mode: "host"
         privileged: true
@@ -204,7 +204,7 @@ services:
 #        command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.23 --nmea_port=9999 --cid=110"
         
     # Convert video data into images.
-#	rec2csv_png:
+#    rec2csv_png:
 #        container_name: rec2csv_png
 #        build:
 #            context: https://github.com/chalmers-revere/rec2csv-png.git
