@@ -11,7 +11,8 @@ hdd=/dev/`lsblk | grep disk | grep 111.8G | cut -d ' ' -f1`
 wget https://raw.github.com/chalmers-revere/opendlv.os/master/x86/get.sh
 sh get.sh
 
-cp setup-available/setup-chroot-02-ptpd.sh \
+cp setup-available/setup-chroot-01-rtkernel.sh \
+   setup-available/setup-chroot-02-ptpd.sh \
    setup-available/setup-post-01-router.sh \
    setup-available/setup-post-05-docker.sh \
    setup-available/setup-post-09-socketcan.sh \
