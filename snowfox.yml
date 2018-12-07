@@ -47,7 +47,7 @@ services:
     # Velodyne HDL32 Lidar (10.42.42.70)
     dev-lidar-hdl32e:
         container_name: dev-lidar-hdl32e
-        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.10
+        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.11
         restart: always
         network_mode: "host"
         cap_add:
@@ -125,7 +125,7 @@ services:
     # Web-application for viewing vehicle data.
     vehicle-view:
         container_name: opendlv-vehicle-view
-        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.51
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.53
         restart: always
         network_mode: "host"
         volumes:
@@ -181,7 +181,7 @@ services:
     # Accessing a video stream from Video4Linux-supported cameras.
 #    dev-camera-v4l:
 #        container_name: dev-camera-v4l
-#        image: chalmersrevere/opendlv-device-camera-v4l-multi:v0.0.6
+#        image: chalmersrevere/opendlv-device-camera-v4l-multi:v0.0.7
 #        restart: always
 #        ipc: "host"
 #        network_mode: "host"
