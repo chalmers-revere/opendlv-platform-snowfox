@@ -40,6 +40,6 @@ sed_arg="s/dev=.*/dev=( can0 can1 )/; \
        	s/bitrate=.*/bitrate=( 500000 1000000 )/"
 sed -i "$sed_arg" setup-post-09-socketcan.sh
 
-chmod +r *.sh
+chmod +x *.sh
 
 su -c ./install.sh -s /bin/bash root
