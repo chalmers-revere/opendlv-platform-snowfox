@@ -47,7 +47,7 @@ services:
     # Velodyne HDL32 Lidar (10.42.42.70)
     dev-lidar-hdl32e:
         container_name: dev-lidar-hdl32e
-        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.11
+        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.13
         restart: always
         network_mode: "host"
         cap_add:
