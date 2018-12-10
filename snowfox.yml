@@ -36,7 +36,7 @@ services:
     # Applanix GPS (10.42.42.40)
     dev-gps-pos:
         container_name: dev-gps-pos
-        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.7
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.9
         restart: always
         network_mode: "host"
         cap_add:
@@ -214,3 +214,14 @@ services:
 #        - .:/opt/data
 #        working_dir: /opt/data
 #        command: "--rec=YourRecording.rec --odvd=YourMessageSpec.odvd"
+
+    # Basler Camera
+#    device-camera-pylon-amd64:
+#        build:
+#            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git
+#            dockerfile: Dockerfile.amd64
+#        restart: on-failure
+#        ipc: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        command: "--camera=0 --width=640 --height=480"
