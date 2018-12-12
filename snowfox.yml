@@ -1,0 +1,227 @@
+version: '2'
+
+services:
+################################################################################
+#
+# The CAN Interfaces for Snowfox need an odsupercomponent.
+#
+################################################################################
+
+    odsupercomponent:
+        container_name: odsupercomponent
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:v0.1.5
+        restart: on-failure
+        network_mode: "host"
+        volumes:
+        - .:/opt/opendlv.data
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n 0 /opt/od4/bin/odsupercomponent --configuration=/opt/opendlv.data/configuration --cid=110"
+
+######################################################################################
+#
+# Microservices for SNOWFOX (Volvo XC90).
+#
+######################################################################################
+   
+    # RTK Corrections for Applanix (needs update)
+#    dlv-ntrip:
+#        container_name: dlv-ntrip
+#        image: copplar.cse.chalmers.se:5043/chalmersrevere/dlv-ntrip
+#        restart: on-failure
+#        network_mode: "host"
+#        command: "/usr/bin/str2str -in ntrip://15044666:2483f@69.64.185.90:7801/1BAG_RTCM3#rtcm3 -out tcpsvr://:2000:#rtcm3 -p 57.72091955 12.01861111 118.3"
+
+    # Applanix GPS (10.42.42.40)
+    dev-gps-pos:
+        container_name: dev-gps-pos
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.10
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -3 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5602 --cid=110"
+
+    # Velodyne HDL32 Lidar (10.42.42.70)
+    dev-lidar-hdl32e:
+        container_name: dev-lidar-hdl32e
+        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.13
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=110 --gpstime"
+
+    # Accessing a video stream using OpenCV (Axis 10.42.42.50)
+    dev-camera-opencv:
+        container_name: dev-camera-opencv
+        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.42.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=640 --height=480 --freq=20 --name.i420=video0.i420 --name.argb=video0.argb"
+
+    # Encoder for camera-opencv(x264)
+    # x264(for research) has the better performance
+    video-x264-encoder-amd64:
+        container_name: video-x264-encoder-amd64
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-encoder.git
+            dockerfile: Dockerfile.amd64
+        restart: on-failure
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -10 /usr/bin/opendlv-video-x264-encoder --cid=110 --name=video0.i420 --width=640 --height=480"
+
+    # CAN interface to access Snowfox.
+    proxy-xc90:
+        container_name: proxy-xc90
+        image:
+        restart: on-failure
+        network_mode: "host"
+        privileged: true
+        depends_on:
+        - odsupercomponent
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 /opt/dlv.snowfox/bin/snowfox-proxy-xc90 --freq=100 --cid=110"
+
+    # PS3 controller
+#    dev-ps3controller:
+#        container_name: dev-ps3controller
+#        image: chalmersrevere/opendlv-device-gamepad-multi:v0.0.10
+#        restart: on-failure
+#        network_mode: "host"
+#        devices:
+#        - "/dev/input/js0:/dev/input/js0"
+#        command: "--device=/dev/input/js0 --axis_leftright=0 --axis_updown=3 --freq=100 --acc_min=0 --acc_max=50 --dec_min=0 --dec_max=-10 --steering_min=-10 --steering_max=10 --steering_max_rate=2.0 --cid=110"
+
+    # PS4 controller
+#    dev-ps4controller:
+#        container_name: dev-ps4controller
+#        image: chalmersrevere/opendlv-device-gamepad-multi:v0.0.10
+#        restart: on-failure
+#        network_mode: "host"
+#        devices:
+#        - "/dev/input/js0:/dev/input/js0"
+#        command: "--device=/dev/input/js0 --axis_leftright=0 --axis_updown=4 --freq=100 --acc_min=0 --acc_max=50 --dec_min=0 --dec_max=-10 --steering_min=-10 --steering_max=10 --steering_max_rate=2.0 --cid=110"
+
+######## NOTE: To make steering sluggish, reduce steering_max_rate i.e. 0 < steering_max_rate < 2  
+
+    # Web-application for viewing vehicle data.
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.53
+        restart: always
+        network_mode: "host"
+        volumes:
+        - ~/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox        
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -15 node index.js"
+
+######################################################################################
+#
+# Other Microservices.
+#
+######################################################################################
+
+    # Encoder for camera-opencv(h264) for industrial applications
+#    video-h264-encoder-amd64:
+#        container_name: video-h264-encoder-amd64
+#        build:
+#           context: https://github.com/chalmers-revere/opendlv-video-h264-encoder.git
+#            dockerfile: Dockerfile.amd64
+#        restart: on-failure
+#        network_mode: "host"
+#        ipc: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#       command: "nice -n -10 /usr/bin/opendlv-video-h264-encoder --cid=110 --name=video0.i420 --width=640 --height=480"
+
+    # Encoder for camera-opencv(vp8)
+#    video-vpx-encoder:
+#        container_name: video-vpx-encoder
+#        image: chalmersrevere/opendlv-video-vpx-encoder-multi:v0.0.5
+#        restart: on-failure
+#        network_mode: "host"
+#        ipc: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -10 /usr/bin/opendlv-video-vpx-encoder --cid=110 --name=video0.i420 --width=640 --height=480 --vp8"
+
+    # Accessing a video stream from Video4Linux-supported cameras.
+#    dev-camera-v4l:
+#        container_name: dev-camera-v4l
+#        image: chalmersrevere/opendlv-device-camera-v4l-multi:v0.0.7
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -5 /usr/bin/opendlv-device-camera-v4l --camera=/dev/video0 --width=640 --height=480 --freq=20"
+
+    # Trimble GPS
+#    dev-gps-nmea:
+#        container_name: dev-gps-nmea
+#        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
+#        restart: on-failure
+#        network_mode: "host"
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.23 --nmea_port=9999 --cid=110"
+        
+    # Convert video data into images.
+#    rec2csv_png:
+#        container_name: rec2csv_png
+#        build:
+#            context: https://github.com/chalmers-revere/rec2csv-png.git
+#            dockerfile: Dockerfile.amd64
+#        restart: on-failure
+#        volumes:
+#        - .:/opt/data
+#        working_dir: /opt/data
+#        command: "--rec=YourRecording.rec --odvd=YourMessageSpec.odvd"
+
+    # Basler Camera
+#    device-camera-pylon-amd64:
+#        build:
+#            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git
+#            dockerfile: Dockerfile.amd64
+#        restart: on-failure
+#        ipc: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        command: "--camera=0 --width=640 --height=480"
