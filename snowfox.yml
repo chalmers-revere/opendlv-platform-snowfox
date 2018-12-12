@@ -53,7 +53,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=110"
+        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=110 --gpstime"
 
     # Accessing a video stream using OpenCV (Axis 10.42.42.50)
     dev-camera-opencv:
