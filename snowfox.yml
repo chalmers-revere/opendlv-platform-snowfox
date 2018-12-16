@@ -183,6 +183,8 @@ services:
 #        container_name: dev-camera-v4l
 #        image: chalmersrevere/opendlv-device-camera-v4l-multi:v0.0.7
 #        restart: always
+#        devices:
+#        - /dev/video0
 #        ipc: "host"
 #        network_mode: "host"
 #        volumes:
