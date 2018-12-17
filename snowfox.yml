@@ -62,7 +62,7 @@ services:
         restart: always
         ipc: "host"
         network_mode: "host"
-        environment
+        environment:
         - CLUON_SHAREDMEMORY_POSIX=1
         volumes:
         - /tmp:/tmp
@@ -81,7 +81,7 @@ services:
         restart: always
         network_mode: "host"
         ipc: "host"
-        environment
+        environment:
         - CLUON_SHAREDMEMORY_POSIX=1
         volumes:
         - /tmp:/tmp
