@@ -58,7 +58,7 @@ services:
     # Accessing a video stream using OpenCV (Axis 10.42.42.50)
     dev-camera-opencv:
         container_name: dev-camera-opencv
-        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
+        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.11
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -129,7 +129,7 @@ services:
     # Web-application for viewing vehicle data.
     vehicle-view:
         container_name: opendlv-vehicle-view
-        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.53
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.54
         restart: always
         network_mode: "host"
         volumes:
@@ -185,7 +185,7 @@ services:
     # Accessing a video stream from Video4Linux-supported cameras.
 #    dev-camera-v4l:
 #        container_name: dev-camera-v4l
-#        image: chalmersrevere/opendlv-device-camera-v4l-multi:v0.0.7
+#        image: chalmersrevere/opendlv-device-camera-v4l-multi:v0.0.8
 #        restart: always
 #        devices:
 #        - /dev/video0
