@@ -1,0 +1,27 @@
+version: '2' # Must be present exactly once at the beginning of the docker-compose.yml file
+
+services:    # Must be present exactly once at the beginning of the docker-compose.yml file
+
+    # Basler Camera
+#    device-camera-pylon-amd64:
+#        build:
+#            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git
+#            dockerfile: Dockerfile.amd64
+#        restart: on-failure
+#        ipc: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        command: "--camera=0 --width=640 --height=480"
+
+#    video-x264-encoder-amd64:
+#        build:
+#            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git
+#            dockerfile: Dockerfile.amd64
+#        restart: on-failure
+#        network_mode: "host"
+#        ipc: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        - ./:/data
+#        working_dir: /data
+#        command: "--name=video0.i420 --width=640 --height=480"    
