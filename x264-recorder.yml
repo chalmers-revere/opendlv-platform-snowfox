@@ -14,7 +14,7 @@ services:    # Must be present exactly once at the beginning of the docker-compo
 #        - /tmp:/tmp
 #        command: "--camera=0 --width=640 --height=480"
 
-#    video-x264-encoder-amd64:
+#    video-x264-recorder-amd64:
 #        build:
 #            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git
 #            dockerfile: Dockerfile.amd64
