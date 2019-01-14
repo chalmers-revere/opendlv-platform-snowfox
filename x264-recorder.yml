@@ -24,4 +24,4 @@ services:    # Must be present exactly once at the beginning of the docker-compo
 #        - /tmp:/tmp
 #        - ./:/data
 #        working_dir: /data
-#        command: "--name=video0.i420 --width=640 --height=480"    
+#        command: "--name=video0.i420 --width=640 --height=480 --cid=110"    
