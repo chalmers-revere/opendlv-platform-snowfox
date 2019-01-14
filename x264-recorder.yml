@@ -5,7 +5,7 @@ services:    # Must be present exactly once at the beginning of the docker-compo
     # Basler Camera
 #    device-camera-pylon-amd64:
 #        build:
-#            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#f74da40d25dfb9ed99c2c44acfdd62f39356dcfa
+#            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
 #            dockerfile: Dockerfile.amd64
 #        restart: on-failure
 #        ipc: "host"
