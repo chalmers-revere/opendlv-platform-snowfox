@@ -9,6 +9,7 @@ services:    # Must be present exactly once at the beginning of the docker-compo
 #            dockerfile: Dockerfile.amd64
 #        restart: on-failure
 #        ipc: "host"
+#        net: "host"
 #        volumes:
 #        - /tmp:/tmp
 #        command: "--camera=0 --width=640 --height=480"
