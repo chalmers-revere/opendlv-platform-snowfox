@@ -90,7 +90,7 @@ services:
     # Axis camera.
     dev-camera-axis0:
         container_name: dev-camera-opencv
-        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
+        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.11
         restart: always
         ipc: "host"
         network_mode: "host"
