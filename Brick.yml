@@ -1,119 +1,16 @@
 version: '2'
 
 services:
-    # Web-application for viewing vehicle data.
-    vehicle-view:
-        container_name: opendlv-vehicle-view
-        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.55
-        restart: always
-        network_mode: "host"
-        volumes:
-        - ~/recordings:/opt/vehicle-view/recordings
-        - /var/run/docker.sock:/var/run/docker.sock
-        environment:
-        - OD4SESSION_CID=110
-        - PLAYBACK_OD4SESSION_CID=210
-        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox        
-        ports:
-        - "8081:8081"
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -15 node index.js"
-
-
-    dev-gps-pos:
-        container_name: dev-gps-pos
-        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.10
-        restart: always
-        network_mode: "host"
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -3 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5602 --cid=110 --id=0"
-
-
-    dev-gps-nmea:
-        container_name: dev-gps-nmea
-        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
-        restart: always
-        network_mode: "host"
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.29 --nmea_port=9999 --cid=110 --id=1"
-
     ###########################################################################
-    # Axis
-    dev-camera-opencv:
-        container_name: dev-camera-opencv
-        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
-        restart: always
-        ipc: "host"
-        network_mode: "host"
-        environment:
-        - DISPLAY=$DISPLAY
-        volumes:
-        - /tmp:/tmp
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -5 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.42.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis2.i420 --name.argb=axis2.argb"
-
-    x264-lossless-recorder-axis2:
-        container_name: x264-lossless-recorder-axis2
-        image: x264-recorder:v0.0.1
-        restart: always
-        ipc: "host"
-        network_mode: "host"
-        volumes:
-        - /tmp:/tmp
-        - $HOME/recordings:/recordings
-        working_dir: /recordings
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -6 /usr/bin/opendlv-video-x264-recorder --id=2 --name=axis2.i420 --width=1280 --height=720 --rec=2019-01-28_axis2.rec"
-
-
-    thumbnail-axis2:
-        container_name: thumbnail-axis2
-        image: chalmersrevere/i420toolbox-amd64:v0.0.1
-        restart: always
-        ipc: "host"
-        environment:
-        - DISPLAY=$DISPLAY
-        volumes:
-        - /tmp:/tmp
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -2 /usr/bin/i420toolbox --in=axis2.i420 --out=tnaxis2.i420 --in.width=1280 --in.height=720 --crop.x=320 --crop.y=0 --crop.width=640 --crop.height=480"
-
-
-    x264-lossy-encoder-tnaxis2:
-        container_name: x264-lossy-encoder-tnaxis2
+    # Basler
+    dev-camera-basler:
+        container_name: dev-camera-basler
         build:
-            context: https://github.com/chalmers-revere/opendlv-video-x264-encoder.git
+            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
             dockerfile: Dockerfile.amd64
         restart: always
         network_mode: "host"
         ipc: "host"
-        volumes:
-        - /tmp:/tmp
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -10 /usr/bin/opendlv-video-x264-encoder --cid=110 --name=tnaxis2.i420 --width=640 --height=480 --id=2"
-
-    ###########################################################################
-    # BoB
-    dev-camera-bob:
-        container_name: dev-camera-bob
-        image: 
-        restart: always
-        ipc: "host"
-        network_mode: "host"
         environment:
         - DISPLAY=$DISPLAY
         volumes:
@@ -121,5 +18,5 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -5 /usr/bin/dlv-device-camera-bob --cid=110 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob1.i420 --name.argb=bob1.argb"
+        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1280 --height=768 --offsetX=640 --offsetY=500 --fps=15 --verbose"
 
