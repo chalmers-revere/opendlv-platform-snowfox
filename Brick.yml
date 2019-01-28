@@ -18,5 +18,5 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1280 --height=768 --offsetX=640 --offsetY=500 --fps=15 --verbose"
+        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1280 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler0.i420 --name.argb=basler0.argb"
 
