@@ -20,3 +20,27 @@ services:
         - SYS_NICE
         entrypoint: ""
         command: "nice -n -15 node index.js"
+
+
+    # Applanix GPS (10.42.42.40)
+    dev-gps-pos:
+        container_name: dev-gps-pos
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.10
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -3 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5602 --cid=110 --id=0"
+
+
+    dev-gps-nmea:
+        container_name: dev-gps-nmea
+        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
+        restart: on-failure
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.29 --nmea_port=9999 --cid=110 --id=1"
+
