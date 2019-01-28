@@ -43,13 +43,16 @@ services:
         entrypoint: ""
         command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.29 --nmea_port=9999 --cid=110 --id=1"
 
-    
+    ###########################################################################
+    # Axis
     dev-camera-opencv:
         container_name: dev-camera-opencv
         image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
         restart: always
         ipc: "host"
         network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
         volumes:
         - /tmp:/tmp
         cap_add:
@@ -70,4 +73,38 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -6 /usr/bin/opendlv-video-x264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --verbose --rec=2019-01-28_axis0-0.rec"
+        command: "nice -n -6 /usr/bin/opendlv-video-x264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --rec=2019-01-28_axis0-0.rec"
+
+
+    thumbnail-axis0:
+        container_name: thumbnail-axis0
+        image: chalmersrevere/i420toolbox-amd64:v0.0.1
+        restart: always
+        ipc: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -2 /usr/bin/i420toolbox --in=axis0.i420 --out=tnaxis0.i420 --in.width=1280 --in.height=720 --crop.x=320 --crop.y=0 --crop.width=640 --crop.height=480"
+
+    x264-lossy-encoder-tnaxis0:
+        container_name: x264-lossy-encoder-tnaxis0
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-encoder.git
+            dockerfile: Dockerfile.amd64
+        restart: on-failure
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -10 /usr/bin/opendlv-video-x264-encoder --cid=110 --name=tnaxis0.i420 --width=640 --height=480 --id=0"
+
+    ###########################################################################
+    # BoB
+
