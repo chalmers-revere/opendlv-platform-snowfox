@@ -1,12 +1,6 @@
 version: '2'
 
 services:
-################################################################################
-#
-# The CAN Interfaces for Snowfox need an odsupercomponent.
-#
-################################################################################
-
     odsupercomponent:
         container_name: odsupercomponent
         image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:v0.1.5
@@ -22,7 +16,7 @@ services:
     # CAN interface to access Snowfox.
     proxy-xc90:
         container_name: proxy-xc90
-        image: 
+        image: $DOCKER_IMAGE_PROXY_XC90
         restart: on-failure
         network_mode: "host"
         privileged: true
@@ -55,6 +49,8 @@ services:
         command: "nice -n -15 node index.js"
 
 
+    ###########################################################################
+    # GPS devices.
     dev-gps-pos:
         container_name: dev-gps-pos
         image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.10
@@ -78,7 +74,7 @@ services:
 
 
     ###########################################################################
-    # Velodyne HDL32 Lidar (10.42.42.70)
+    # Velodyne HDL32 Lidar.
     dev-lidar-hdl32e:
         container_name: dev-lidar-hdl32e
         image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.13
@@ -91,7 +87,7 @@ services:
 
 
     ###########################################################################
-    # Axis
+    # Axis camera.
     dev-camera-axis0:
         container_name: dev-camera-opencv
         image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10

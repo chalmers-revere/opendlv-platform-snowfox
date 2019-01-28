@@ -5,7 +5,7 @@ services:
     # BoB
     dev-camera-bob2:
         container_name: dev-camera-bob2
-        image: 
+        image: $DOCKER_IMAGE_DEV_CAMERA_BOB
         restart: always
         ipc: "host"
         network_mode: "host"
