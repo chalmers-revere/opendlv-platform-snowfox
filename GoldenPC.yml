@@ -40,7 +40,7 @@ services:
         environment:
         - OD4SESSION_CID=110
         - PLAYBACK_OD4SESSION_CID=210
-        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox        
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
         ports:
         - "8081:8081"
         cap_add:
@@ -132,7 +132,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -2 /usr/bin/i420toolbox --in=axis0.i420 --out=tnaxis0.i420 --in.width=1280 --in.height=720 --crop.x=320 --crop.y=0 --crop.width=640 --crop.height=480"
+        command: "nice -n -3 /usr/bin/i420toolbox --in=axis0.i420 --out=tnaxis0.i420 --in.width=1280 --in.height=720 --crop.x=320 --crop.y=0 --crop.width=640 --crop.height=480"
 
     x264-lossy-encoder-tnaxis0:
         container_name: x264-lossy-encoder-tnaxis0
@@ -147,6 +147,6 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -10 /usr/bin/opendlv-video-x264-encoder --cid=110 --name=tnaxis0.i420 --width=640 --height=480 --id=0"
+        command: "nice -n -4 /usr/bin/opendlv-video-x264-encoder --cid=110 --name=tnaxis0.i420 --width=640 --height=480 --id=0"
 
 
