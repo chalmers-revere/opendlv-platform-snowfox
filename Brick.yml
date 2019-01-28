@@ -22,7 +22,6 @@ services:
         command: "nice -n -15 node index.js"
 
 
-    # Applanix GPS (10.42.42.40)
     dev-gps-pos:
         container_name: dev-gps-pos
         image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.10
@@ -44,3 +43,31 @@ services:
         entrypoint: ""
         command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.29 --nmea_port=9999 --cid=110 --id=1"
 
+    
+    dev-camera-opencv:
+        container_name: dev-camera-opencv
+        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.10
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.42.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis0.i420 --name.argb=axis0.argb"
+
+    x264-lossless-recorder-axis0:
+        container_name: x264-lossless-recorder-axis0
+        image: x264-recorder:v0.0.1
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/opendlv-video-x264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --verbose --rec=2019-01-28_axis0-0.rec"
