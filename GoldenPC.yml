@@ -96,7 +96,9 @@ services:
 
     x264-lossless-recorder-axis2:
         container_name: x264-lossless-recorder-axis2
-        image: x264-recorder:v0.0.1
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.1
+            dockerfile: Dockerfile.amd64
         restart: always
         ipc: "host"
         network_mode: "host"
