@@ -18,6 +18,24 @@ services:
         entrypoint: ""
         command: "nice -n -5 /usr/bin/dlv-device-camera-bob --cid=110 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob2.i420 --name.argb=bob2.argb"
 
+    x264-lossless-recorder-bob2:
+        container_name: x264-lossless-recorder-bob2
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.1
+            dockerfile: Dockerfile.amd64
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings/bob:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/opendlv-video-x264-recorder --id=2 --name=bob2.i420 --width=1104 --height=624"
+
+
 
     ###########################################################################
     # Basler
@@ -36,5 +54,24 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1280 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb --cid=110"
+        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1024 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb --cid=110"
+
+    x264-lossless-recorder-basler1:
+        container_name: x264-lossless-recorder-basler1
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.1
+            dockerfile: Dockerfile.amd64
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings/basler:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/opendlv-video-x264-recorder --id=1 --name=basler1.i420 --width=1024 --height=768"
+
+
 
