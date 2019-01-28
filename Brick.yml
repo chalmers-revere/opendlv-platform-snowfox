@@ -2,9 +2,27 @@ version: '2'
 
 services:
     ###########################################################################
+    # BoB
+    dev-camera-bob2:
+        container_name: dev-camera-bob2
+        image: 
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/dlv-device-camera-bob --cid=110 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob2.i420 --name.argb=bob2.argb"
+
+
+    ###########################################################################
     # Basler
-    dev-camera-basler:
-        container_name: dev-camera-basler
+    dev-camera-basler1:
+        container_name: dev-camera-basler1
         build:
             context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
             dockerfile: Dockerfile.amd64
@@ -18,5 +36,5 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1280 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler0.i420 --name.argb=basler0.argb"
+        command: "nice -n -10 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1280 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb"
 
