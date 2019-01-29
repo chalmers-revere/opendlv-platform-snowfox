@@ -81,7 +81,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1024 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb --cid=110"
+        command: "nice -n -7 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1024 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb"
 
     x264-ll-rec-basler1:
         container_name: x264-lossless-recorder-basler1
