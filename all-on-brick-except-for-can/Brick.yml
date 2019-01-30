@@ -1,0 +1,312 @@
+# Copyright (C) 2019  Christian Berger
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+version: '2'
+
+services:
+    ###########################################################################
+    # Web-application for viewing vehicle data.
+    cadvisor:
+        image: google/cadvisor:v0.32.0
+        cpuset: "0"
+        command: -storage_driver=influxdb -storage_driver_db=cadvisor -storage_driver_host=influxsrv:8086
+        restart: always
+        ports:
+        - "8080:8080"
+        volumes:
+        - /:/rootfs:ro
+        - /var/run:/var/run:rw
+        - /sys:/sys:ro
+        - /var/lib/docker/:/var/lib/docker:ro
+
+    # Web-application for viewing vehicle data.
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.55
+        cpuset: "0"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - ~/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -15 node index.js"
+
+    ###########################################################################
+    # GPS devices.
+
+    # Applanix Ethernet Realtime port.
+    dev-gps-pos-rt:
+        container_name: dev-gps-pos-rt
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5602 --cid=110 --id=0"
+
+    # Applanix Ethernet Loggin port.
+    dev-gps-pos-log:
+        container_name: dev-gps-pos-log
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -4 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5603 --cid=110 --id=0"
+
+   # Trimble.
+    dev-gps-nmea:
+        container_name: dev-gps-nmea
+        image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -3 /usr/bin/opendlv-device-gps-nmea --nmea_ip=10.42.42.29 --nmea_port=9999 --cid=110 --id=1"
+
+    ###########################################################################
+    # Velodyne HDL32 Lidar.
+    dev-lidar-hdl32e:
+        container_name: dev-lidar-hdl32e
+        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.13
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=110 --gpstime"
+
+
+    ###########################################################################
+    # Axis camera.
+    dev-camera-axis0:
+        container_name: dev-camera-opencv
+        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.11
+        cpuset: "1"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.42.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis0.i420 --name.argb=axis0.argb"
+
+    x264-ll-rec-axis0:
+        container_name: x264-lossless-recorder-axis0
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
+            dockerfile: Dockerfile.amd64
+        cpuset: "1"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --recsuffix=axis0"
+
+    thumbnail-axis0:
+        container_name: thumbnail-axis0
+        image: chalmersrevere/i420toolbox-amd64:v0.0.2
+        cpuset: "1"
+        restart: always
+        ipc: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/i420toolbox --in=axis0.i420 --out=tnaxis0.i420 --in.width=1280 --in.height=720 --crop.x=320 --crop.y=0 --crop.width=640 --crop.height=480"
+
+    x264-lsy-enc-tnaxis0:
+        container_name: x264-lossy-encoder-tnaxis0
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-encoder.git
+            dockerfile: Dockerfile.amd64
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/opendlv-video-x264-encoder --cid=110 --name=tnaxis0.i420 --width=640 --height=480 --id=0"
+
+
+    ###########################################################################
+    # Basler.
+    dev-camera-basler1:
+        container_name: dev-camera-basler1
+        build:
+            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
+            dockerfile: Dockerfile.amd64
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1024 --height=768 --offsetX=640 --offsetY=500 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb"
+
+    x264-ll-rec-basler1:
+        container_name: x264-lossless-recorder-basler1
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
+            dockerfile: Dockerfile.amd64
+        cpuset: "2"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=1 --name=basler1.i420 --width=1024 --height=768 --recsuffix=basler1"
+
+    thumbnail-basler1:
+        container_name: thumbnail-basler1
+        image: chalmersrevere/i420toolbox-amd64:v0.0.2
+        cpuset: "2"
+        restart: always
+        ipc: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/i420toolbox --in=basler1.i420 --out=tnbasler1.i420 --in.width=1024 --in.height=768 --crop.x=192 --crop.y=144 --crop.width=640 --crop.height=480"
+
+    qsv-lsy-enc-tnbasler1:
+        container_name: qsv-lossy-encoder-tnbasler1
+        image: chrberger/video-qsv-h264-encoder:v0.0.2
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        devices:
+        - "/dev/dri/renderD128:/dev/dri/renderD128"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/video-qsv-h264-encoder --cid=110 --name=tnbasler1.i420 --width=640 --height=480 --gop=1 --id=1"
+
+
+    ###########################################################################
+    # BoB.
+    dev-camera-bob2:
+        container_name: dev-camera-bob2
+        image: $DOCKER_IMAGE_DEV_CAMERA_BOB
+        cpuset: "3"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-camera-bob --cid=110 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob2.i420 --name.argb=bob2.argb"
+
+    x264-ll-rec-bob2:
+        container_name: x264-lossless-recorder-bob2
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
+            dockerfile: Dockerfile.amd64
+        cpuset: "3"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=2 --name=bob2.i420 --width=1104 --height=624 --recsuffix=bob2"
+
+    thumbnail-bob2:
+        container_name: thumbnail-bob2
+        image: chalmersrevere/i420toolbox-amd64:v0.0.2
+        cpuset: "3"
+        restart: always
+        ipc: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/i420toolbox --in=bob2.i420 --out=tnbob2.i420 --in.width=1104 --in.height=624 --crop.x=232 --crop.y=72 --crop.width=640 --crop.height=480"
+
+    qsv-lsy-enc-tnbob2:
+        container_name: qsv-lossy-encoder-tnbob2
+        image: chrberger/video-qsv-h264-encoder:v0.0.2
+        cpuset: "3"
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        devices:
+        - "/dev/dri/renderD128:/dev/dri/renderD128"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/video-qsv-h264-encoder --cid=110 --name=tnbob2.i420 --width=640 --height=480 --gop=1 --id=2"
+

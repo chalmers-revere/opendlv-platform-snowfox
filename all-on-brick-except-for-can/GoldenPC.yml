@@ -1,0 +1,47 @@
+# Copyright (C) 2019  Christian Berger
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+version: '2'
+
+services:
+    # odsupercomponent is required for proxy-xc90.
+    odsupercomponent:
+        container_name: odsupercomponent
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:v0.1.5
+        cpuset: "0"
+        restart: on-failure
+        network_mode: "host"
+        volumes:
+        - .:/opt/opendlv.data
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n 0 /opt/od4/bin/odsupercomponent --configuration=/opt/opendlv.data/configuration --cid=110"
+
+    # CAN interface to access Snowfox.
+    proxy-xc90:
+        container_name: proxy-xc90
+        image: $DOCKER_IMAGE_PROXY_XC90
+        depends_on:
+        - odsupercomponent
+        cpuset: "1"
+        restart: on-failure
+        network_mode: "host"
+        privileged: true
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 /opt/dlv.snowfox/bin/snowfox-proxy-xc90 --freq=100 --cid=110"
+
