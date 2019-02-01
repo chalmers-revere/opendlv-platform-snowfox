@@ -95,7 +95,7 @@ services:
     # Velodyne HDL32 Lidar.
     dev-lidar-hdl32e:
         container_name: dev-lidar-hdl32e
-        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.13
+        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.14
         cpuset: "3"
         restart: always
         network_mode: "host"
@@ -121,7 +121,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -8 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.42.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis0.i420 --name.argb=axis0.argb"
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.44.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis0.i420 --name.argb=axis0.argb"
 
     x264-ll-rec-axis0:
         container_name: x264-lossless-recorder-axis0
