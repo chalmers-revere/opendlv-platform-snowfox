@@ -20,7 +20,7 @@ services:
     # Web-application for viewing vehicle data.
     cadvisor:
         image: google/cadvisor:v0.32.0
-        cpuset: "0"
+        cpuset: "2"
         command: -storage_driver=influxdb -storage_driver_db=cadvisor -storage_driver_host=influxsrv:8086
         restart: always
         ports:
@@ -35,7 +35,7 @@ services:
     vehicle-view:
         container_name: opendlv-vehicle-view
         image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.57
-        cpuset: "0"
+        cpuset: "3"
         restart: always
         network_mode: "host"
         volumes:
@@ -59,7 +59,7 @@ services:
     dev-gps-pos-rt:
         container_name: dev-gps-pos-rt
         image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
-        cpuset: "1"
+        cpuset: "4"
         restart: always
         network_mode: "host"
         cap_add:
@@ -71,7 +71,7 @@ services:
     dev-gps-pos-log:
         container_name: dev-gps-pos-log
         image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
-        cpuset: "1"
+        cpuset: "4"
         restart: always
         network_mode: "host"
         cap_add:
@@ -83,7 +83,7 @@ services:
     dev-gps-nmea:
         container_name: dev-gps-nmea
         image: chalmersrevere/opendlv-device-gps-nmea-multi:v0.0.13
-        cpuset: "1"
+        cpuset: "4"
         restart: always
         network_mode: "host"
         cap_add:
@@ -96,7 +96,7 @@ services:
     dev-lidar-hdl32e:
         container_name: dev-lidar-hdl32e
         image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.13
-        cpuset: "1"
+        cpuset: "3"
         restart: always
         network_mode: "host"
         cap_add:
@@ -110,7 +110,7 @@ services:
     dev-camera-axis0:
         container_name: dev-camera-opencv
         image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.11
-        cpuset: "1"
+        cpuset: "5"
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -128,7 +128,7 @@ services:
         build:
             context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
             dockerfile: Dockerfile.amd64
-        cpuset: "1"
+        cpuset: "5"
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -144,7 +144,7 @@ services:
     thumbnail-axis0:
         container_name: thumbnail-axis0
         image: chalmersrevere/i420toolbox-amd64:v0.0.2
-        cpuset: "1"
+        cpuset: "5"
         restart: always
         ipc: "host"
         environment:
@@ -161,7 +161,7 @@ services:
         build:
             context: https://github.com/chalmers-revere/opendlv-video-x264-encoder.git
             dockerfile: Dockerfile.amd64
-        cpuset: "1"
+        cpuset: "5"
         restart: always
         network_mode: "host"
         ipc: "host"
@@ -180,7 +180,7 @@ services:
         build:
             context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
             dockerfile: Dockerfile.amd64
-        cpuset: "2"
+        cpuset: "6"
         restart: always
         network_mode: "host"
         ipc: "host"
@@ -198,7 +198,7 @@ services:
         build:
             context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
             dockerfile: Dockerfile.amd64
-        cpuset: "2"
+        cpuset: "6"
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -214,7 +214,7 @@ services:
     thumbnail-basler1:
         container_name: thumbnail-basler1
         image: chalmersrevere/i420toolbox-amd64:v0.0.2
-        cpuset: "2"
+        cpuset: "6"
         restart: always
         ipc: "host"
         environment:
@@ -229,7 +229,7 @@ services:
     qsv-lsy-enc-tnbasler1:
         container_name: qsv-lossy-encoder-tnbasler1
         image: chrberger/video-qsv-h264-encoder:v0.0.2
-        cpuset: "2"
+        cpuset: "6"
         restart: always
         network_mode: "host"
         ipc: "host"
@@ -248,7 +248,7 @@ services:
     dev-camera-bob2:
         container_name: dev-camera-bob2
         image: $DOCKER_IMAGE_DEV_CAMERA_BOB
-        cpuset: "3"
+        cpuset: "7"
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -266,7 +266,7 @@ services:
         build:
             context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
             dockerfile: Dockerfile.amd64
-        cpuset: "3"
+        cpuset: "7"
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -282,7 +282,7 @@ services:
     thumbnail-bob2:
         container_name: thumbnail-bob2
         image: chalmersrevere/i420toolbox-amd64:v0.0.2
-        cpuset: "3"
+        cpuset: "7"
         restart: always
         ipc: "host"
         environment:
@@ -297,7 +297,7 @@ services:
     qsv-lsy-enc-tnbob2:
         container_name: qsv-lossy-encoder-tnbob2
         image: chrberger/video-qsv-h264-encoder:v0.0.2
-        cpuset: "3"
+        cpuset: "7"
         restart: always
         network_mode: "host"
         ipc: "host"
