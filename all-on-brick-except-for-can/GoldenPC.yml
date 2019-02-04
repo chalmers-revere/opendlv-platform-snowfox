@@ -16,26 +16,11 @@
 version: '2'
 
 services:
-    # odsupercomponent is required for proxy-xc90.
-    odsupercomponent:
-        container_name: odsupercomponent
-        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:v0.1.5
-        cpuset: "0"
-        restart: on-failure
-        network_mode: "host"
-        volumes:
-        - .:/opt/opendlv.data
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n 0 /opt/od4/bin/odsupercomponent --configuration=/opt/opendlv.data/configuration --cid=110"
-
     # CAN interface to access Snowfox.
-    proxy-xc90:
-        container_name: proxy-xc90
+    # (readonly, add --disablereadonly to allow writing to CAN).
+    dlv-cangw-snowfox:
+        container_name: dlv-cangw-snowfox
         image: $DOCKER_IMAGE_PROXY_XC90
-        depends_on:
-        - odsupercomponent
         cpuset: "1"
         restart: on-failure
         network_mode: "host"
@@ -43,5 +28,5 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -1 /opt/dlv.snowfox/bin/snowfox-proxy-xc90 --freq=100 --cid=110"
+        command: "nice -n -1 /usr/bin/dlv-device-cangw-snowfox --cid=110 --can=can0"
 
