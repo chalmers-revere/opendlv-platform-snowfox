@@ -1,0 +1,141 @@
+# docker-compose.yml - Composition of micro-services to run OpenDLV software.
+# Copyright (C) 2017 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2017-08-08
+
+version: '2'
+
+services:
+    ###########################################################################
+    # First, create two named pipes.
+    make-pipes:
+        image: chrberger/cluon-amd64:latest
+        cap_add:
+            - MKNOD
+        volumes:
+            - .:/io:shared
+        command: "/bin/sh -c '[ ! -f /io/odfilter-odredirector ] && mknod -m 0666 /io/odfilter-odredirector p; [ ! -f /io/odredirector-odfilter ] && mknod -m 0666 /io/odredirector-odfilter p'"
+
+    # odsupercomponent-110 hosts an odredirector to dump data to STDOUT.
+    odsupercomponent-110:
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+        network_mode: "host"
+        depends_on:
+            - make-pipes
+        volumes:
+        - .:/opt/opendlv.data
+        command: "/opt/od4/bin/odsupercomponent --cid=110 --verbose=1 --configuration=/opt/opendlv.data/configuration"
+
+    # odsupercomponent-111 hosts an odredirector to pump data to STDIN.
+    odsupercomponent-111:
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+        network_mode: "host"
+        depends_on:
+            - odsupercomponent-110
+        volumes:
+        - .:/opt/opendlv.data
+        command: "/opt/od4/bin/odsupercomponent --cid=111 --verbose=1 --configuration=/opt/opendlv.data/configuration"
+
+    ###########################################################################
+    # odredirector in 110 reads from STDIN (from a named pipe in our case) to restore the Containers in CID 114.
+    odredirector-110:
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+        network_mode: "host"
+        stdin_open: true
+        depends_on:
+            - odsupercomponent-110
+        volumes:
+            - ./odfilter-odredirector:/io/odfilter-odredirector
+        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=110 --fromstdin=1 0< /io/odfilter-odredirector'"
+
+    # odfilter reads from STDIN (from a named pipe in our case) and filters selected containers to STDOUT (another named pipe in our case).
+    odfilter:
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+        network_mode: "host"
+        stdin_open: true
+        depends_on:
+            - odredirector-110      # ...then, the odfilter in between, ...
+        volumes:
+            - ./odredirector-odfilter:/io/odredirector-odfilter
+            - ./odfilter-odredirector:/io/odfilter-odredirector
+        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=19:10 0< /io/odredirector-odfilter 1> /io/odfilter-odredirector'"
+
+    # odredirector in 111 dumps containers from CID 111 to STDOUT (to a named pipe in our case).
+    odredirector-111:
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+        network_mode: "host"
+        stdin_open: true
+        depends_on:
+            - odsupercomponent-111
+            - odfilter              # ...followed by the data source.
+        volumes:
+            - ./odredirector-odfilter:/io/odredirector-odfilter
+        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=111 --tostdout=1 1> /io/odredirector-odfilter'"
+
+    ###########################################################################
+    # opendlv-vehicle-view on 110.
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.57
+        cpuset: "2"
+        restart: always
+        depends_on:
+            - odsupercomponent-110
+        network_mode: "host"
+        volumes:
+        - ~/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -15 node index.js"
+
+    # Applanix Ethernet Realtime port on 110.
+    dev-gps-pos-rt:
+        container_name: dev-gps-pos-rt
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
+        cpuset: "4"
+        restart: always
+        depends_on:
+            - odsupercomponent-111
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5602 --cid=111 --id=0"
+
+    # Applanix Ethernet Loggin port on 111.
+    dev-gps-pos-log:
+        container_name: dev-gps-pos-log
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
+        cpuset: "4"
+        restart: always
+        depends_on:
+            - odsupercomponent-111
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -4 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5603 --cid=111 --id=0"
+
+
