@@ -22,77 +22,95 @@ version: '2'
 services:
     ###########################################################################
     # First, create two named pipes.
-    make-pipes:
+    make-pipes-110-111:
+        container_name: make-pipes-110-111
         image: chrberger/cluon-amd64:latest
         cpuset: "0"
         cap_add:
-            - MKNOD
+        - MKNOD
         volumes:
-            - .:/io:shared
+        - .:/io:shared
         command: "/bin/sh -c '[ ! -f /io/stdin-111-110 ] && mknod -m 0666 /io/stdin-111-110 p; [ ! -f /io/111-110-stdout ] && mknod -m 0666 /io/111-110-stdout p'"
 
-    # odsupercomponent-110 hosts an odredirector to dump data to STDOUT.
-    odsupercomponent-110:
+    # odsupercomponent-109 hosts an odredirector to dump data to STDOUT.
+    odsupercomponent-109:
+        container_name: odsupercomponent-109
         image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
         cpuset: "2"
         network_mode: "host"
         depends_on:
-            - make-pipes
+        - make-pipes-110-111
+        volumes:
+        - .:/opt/opendlv.data
+        command: "/opt/od4/bin/odsupercomponent --cid=109 --verbose=1 --configuration=/opt/opendlv.data/configuration"
+
+    # odsupercomponent-110 hosts an odredirector to pump data from STDIN.
+    odsupercomponent-110:
+        container_name: odsupercomponent-110
+        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+        cpuset: "2"
+        network_mode: "host"
+        depends_on:
+        - odsupercomponent-109
         volumes:
         - .:/opt/opendlv.data
         command: "/opt/od4/bin/odsupercomponent --cid=110 --verbose=1 --configuration=/opt/opendlv.data/configuration"
 
-    # odsupercomponent-111 hosts an odredirector to pump data to STDIN.
+    # odsupercomponent-111 hosts an odredirector to dump data to STDOUT.
     odsupercomponent-111:
+        container_name: odsupercomponent-111
         image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
         cpuset: "2"
         network_mode: "host"
         depends_on:
-            - odsupercomponent-110
+        - odsupercomponent-110
         volumes:
         - .:/opt/opendlv.data
         command: "/opt/od4/bin/odsupercomponent --cid=111 --verbose=1 --configuration=/opt/opendlv.data/configuration"
 
     ###########################################################################
-    # odredirector in 110 reads from STDIN (from a named pipe in our case) to restore the Containers in CID 114.
-    odredirector-110:
+    # odredirector in 110 reads from STDIN (from a named pipe in our case) to restore the Containers in CID 111.
+    odredirector-stdin-to-110:
+        container_name: odredirector-stdin-to-110
         image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
         cpuset: "2"
         network_mode: "host"
         stdin_open: true
         depends_on:
-            - odsupercomponent-110
+        - odsupercomponent-110
         volumes:
-            - ./stdin-111-110:/io/stdin-111-110
+        - ./stdin-111-110:/io/stdin-111-110
         command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=110 --fromstdin=1 0< /io/stdin-111-110'"
 
     # odfilter reads from STDIN (from a named pipe in our case) and filters selected containers to STDOUT (another named pipe in our case).
     # 19@10Hz=opendlv.proxy.GeodeticWgs84Reading
     # 1046@10Hz=opendlv.proxy.GroundSpeedReading
     # 49@10Hz=opendlv.proxy.PointCloudReading
-    odfilter:
+    odfilter-111-110:
+        container_name: odfilter-111-110
         image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
         cpuset: "2"
         network_mode: "host"
         stdin_open: true
         depends_on:
-            - odredirector-110      # ...then, the odfilter in between, ...
+        - odredirector-stdin-to-110 # ...then, the odfilter in between, ...
         volumes:
-            - ./111-110-stdout:/io/111-110-stdout
-            - ./stdin-111-110:/io/stdin-111-110
+        - ./111-110-stdout:/io/111-110-stdout
+        - ./stdin-111-110:/io/stdin-111-110
         command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=19:10,1046:10,49:1 0< /io/111-110-stdout 1> /io/stdin-111-110'"
 
     # odredirector in 111 dumps containers from CID 111 to STDOUT (to a named pipe in our case).
-    odredirector-111:
+    odredirector-111-to-stdout:
+        container_name: odredirector-111-to-stdout
         image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
         cpuset: "2"
         network_mode: "host"
         stdin_open: true
         depends_on:
-            - odsupercomponent-111
-            - odfilter              # ...followed by the data source.
+        - odsupercomponent-111
+        - odfilter-111-110           # ...followed by the data source.
         volumes:
-            - ./111-110-stdout:/io/111-110-stdout
+        - ./111-110-stdout:/io/111-110-stdout
         command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=111 --tostdout=1 1> /io/111-110-stdout'"
 
     ###########################################################################
@@ -103,7 +121,7 @@ services:
         cpuset: "1"
         restart: always
         depends_on:
-            - odsupercomponent-110
+        - odsupercomponent-109
         network_mode: "host"
         volumes:
         - ~/recordings:/opt/vehicle-view/recordings
@@ -126,7 +144,7 @@ services:
         cpuset: "3"
         restart: always
         depends_on:
-            - odsupercomponent-111
+        - odsupercomponent-111
         network_mode: "host"
         cap_add:
         - SYS_NICE
@@ -140,7 +158,7 @@ services:
         cpuset: "3"
         restart: always
         depends_on:
-            - odsupercomponent-111
+        - odsupercomponent-111
         network_mode: "host"
         cap_add:
         - SYS_NICE
@@ -155,7 +173,7 @@ services:
         cpuset: "4"
         restart: always
         depends_on:
-            - odsupercomponent-111
+        - odsupercomponent-111
         network_mode: "host"
         cap_add:
         - SYS_NICE
