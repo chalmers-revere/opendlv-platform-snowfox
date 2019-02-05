@@ -82,46 +82,49 @@ services:
 
     ###########################################################################
     # odredirector in 110 reads from STDIN (from a named pipe in our case) to restore the Containers in CID 111.
-    odredirector-stdin-to-110:
-        container_name: odredirector-stdin-to-110
-        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
-        cpuset: "2"
-        network_mode: "host"
-        stdin_open: true
-        depends_on:
-        - odsupercomponent-110
-        volumes:
-        - ./stdin-109-110:/io/stdin-109-110
-        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=110 --fromstdin=1 0< /io/stdin-109-110'"
+#    odredirector-stdin-to-110:
+#        container_name: odredirector-stdin-to-110
+#        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+#        cpuset: "2"
+#        network_mode: "host"
+#        stdin_open: true
+#        depends_on:
+#        - odsupercomponent-111
+#        volumes:
+##        - ./stdin-109-110:/io/stdin-109-110
+#        - ./109-110-stdout:/io/109-110-stdout
+##        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=111 --fromstdin=1 0< /io/stdin-109-110'"
+#        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=111 --fromstdin=1 0< /io/109-110-stdout'"
 
     # odfilter reads from STDIN (from a named pipe in our case) and filters selected containers to STDOUT (another named pipe in our case).
     # 1046@10Hz=opendlv.proxy.GroundSpeedReading
-    odfilter-109-110:
-        container_name: odfilter-109-110
-        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
-        cpuset: "2"
-        network_mode: "host"
-        stdin_open: true
-        depends_on:
-        - odredirector-stdin-to-110 # ...then, the odfilter in between, ...
-        volumes:
-        - ./109-110-stdout:/io/109-110-stdout
-        - ./stdin-109-110:/io/stdin-109-110
-        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=1046:10 0< /io/109-110-stdout 1> /io/stdin-109-110'"
+#    odfilter-109-110:
+#        container_name: odfilter-109-110
+#        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+#        cpuset: "2"
+#        network_mode: "host"
+#        stdin_open: true
+#        depends_on:
+#        - odredirector-stdin-to-110 # ...then, the odfilter in between, ...
+#        volumes:
+#        - ./109-110-stdout:/io/109-110-stdout
+#        - ./stdin-109-110:/io/stdin-109-110
+#        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=1046:10 0< /io/109-110-stdout 1> /io/stdin-109-110'"
 
     # odredirector in 109 dumps containers from CID 109 to STDOUT (to a named pipe in our case).
-    odredirector-109-to-stdout:
-        container_name: odredirector-109-to-stdout
-        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
-        cpuset: "2"
-        network_mode: "host"
-        stdin_open: true
-        depends_on:
-        - odsupercomponent-109
-        - odfilter-109-110           # ...followed by the data source.
-        volumes:
-        - ./109-110-stdout:/io/109-110-stdout
-        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=109 --tostdout=1 1> /io/109-110-stdout'"
+#    odredirector-109-to-stdout:
+#        container_name: odredirector-109-to-stdout
+#        image: seresearch/opendlv-rhino-on-opendlv-on-opendlv-core-on-opendavinci-on-base:latest
+#        cpuset: "2"
+#        network_mode: "host"
+#        stdin_open: true
+#        depends_on:
+#        - odsupercomponent-109
+#        - odredirector-stdin-to-110 # ...then, the odfilter in between, ...
+##        - odfilter-109-110           # ...followed by the data source.
+#        volumes:
+#        - ./109-110-stdout:/io/109-110-stdout
+#        command: "/bin/sh -c '/opt/od4/bin/odredirector --cid=109 --tostdout=1 1> /io/109-110-stdout'"
 
     ###########################################################################
     # odredirector in 110 reads from STDIN (from a named pipe in our case) to restore the Containers in CID 111.
@@ -151,7 +154,7 @@ services:
         volumes:
         - ./111-110-stdout:/io/111-110-stdout
         - ./stdin-111-110:/io/stdin-111-110
-        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=19:10,49:1 0< /io/111-110-stdout 1> /io/stdin-111-110'"
+        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=19:10,49:1,1046:10 0< /io/111-110-stdout 1> /io/stdin-111-110'"
 
     # odredirector in 111 dumps containers from CID 111 to STDOUT (to a named pipe in our case).
     odredirector-111-to-stdout:
@@ -209,7 +212,7 @@ services:
     dev-gps-pos-log:
         container_name: dev-gps-pos-log
         image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
-        cpuset: "3"
+        cpuset: "4"
         restart: always
         depends_on:
         - odsupercomponent-111
@@ -224,7 +227,7 @@ services:
     dev-lidar-hdl32e:
         container_name: dev-lidar-hdl32e
         image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.14
-        cpuset: "4"
+        cpuset: "5"
         restart: always
         depends_on:
         - odsupercomponent-111
