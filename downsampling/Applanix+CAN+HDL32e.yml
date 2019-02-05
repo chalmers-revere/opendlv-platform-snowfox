@@ -75,7 +75,7 @@ services:
         volumes:
             - ./odredirector-odfilter:/io/odredirector-odfilter
             - ./odfilter-odredirector:/io/odfilter-odredirector
-        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=19:10,1046:10,49:10 0< /io/odredirector-odfilter 1> /io/odfilter-odredirector'"
+        command: "/bin/sh -c '/opt/od4/bin/odfilter --downsample=19:10,1046:10,49:1 0< /io/odredirector-odfilter 1> /io/odfilter-odredirector'"
 
     # odredirector in 111 dumps containers from CID 111 to STDOUT (to a named pipe in our case).
     odredirector-111:
@@ -148,11 +148,11 @@ services:
         image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.14
         cpuset: "3"
         restart: always
+        depends_on:
+            - odsupercomponent-111
         network_mode: "host"
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=0.0.0.0 --hdl32e_port=2368 --cid=111 --gpstime"
-
-
+        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=10.42.44.23 --hdl32e_port=2368 --cid=111 --gpstime"
 
