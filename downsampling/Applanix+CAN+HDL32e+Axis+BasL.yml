@@ -122,23 +122,23 @@ services:
         entrypoint: ""
         command: "nice -n -8 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.45.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis0.i420 --name.argb=axis0.argb"
 
-#    x264-ll-rec-axis0:
-#        container_name: x264-lossless-recorder-axis0
-#        build:
-#            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
-#            dockerfile: Dockerfile.amd64
-#        cpuset: "6"
-#        restart: always
-#        ipc: "host"
-#        network_mode: "host"
-#        volumes:
-#        - /tmp:/tmp
-#        - $HOME/recordings:/recordings
-#        working_dir: /recordings
-#        cap_add:
-#        - SYS_NICE
-#        entrypoint: ""
-#        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --recsuffix=axis0-lossless"
+    x264-ll-rec-axis0:
+        container_name: x264-lossless-recorder-axis0
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
+            dockerfile: Dockerfile.amd64
+        cpuset: "6"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --recsuffix=axis0-lossless"
 
     ###########################################################################
     # Basler.
@@ -165,7 +165,7 @@ services:
         build:
             context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
             dockerfile: Dockerfile.amd64
-        cpuset: "6"
+        cpuset: "7"
         restart: always
         ipc: "host"
         network_mode: "host"
@@ -176,6 +176,6 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=1 --name=basler1.i420 --width=2048 --height=1536 --recsuffix=basler1"
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --cid=111 --id=1 --name=basler1.i420 --width=2048 --height=1536 --recsuffix=basler1"
 
 
