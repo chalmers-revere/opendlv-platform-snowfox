@@ -1,7 +1,22 @@
 #!/bin/bash
+# Copyright (C) 2019  Christian Berger
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 RUNNING=1
-trap 'cleanup' TERM
+trap 'cleanup' SIGINT
+trap 'cleanup' SIGTERM
 
 cleanup() {
     echo "Cleaning up..."
@@ -28,12 +43,13 @@ for i in $@ ; do
     PROGRAM=$(cat ${FILENAME}.core-${i} |head -1|cut -f4 -d";")
     TITLE=$(echo ${FILENAME} | sed -e 's/_/-/')
 cat <<EOF >sysload.gnuplot
-#set terminal pngcairo  transparent enhanced font "arial,10" fontscale 1.0 size 600, 400 
 set terminal pdf
 set output '${FILENAME}.core-${i}.pdf'
 set style increment default
 set title "${TITLE}/core $i"
 set title  font ",20" norotate
+set xlabel "[s]"
+set ylabel "[%]"
 set xrange [ * : * ] noreverse writeback
 set yrange [ 0 : 100 ] noreverse writeback
 set datafile separator ";"
