@@ -30,7 +30,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=109 --cid-to=111"
+        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=109 --cid-to=111 --keep=512,513,514,515,516,518,521,523,1046"
 
     ###########################################################################
     # Relay and downsample Envelopes from CID 111 (local CID session on Brick) to CID 110 (for opendlv-vehicle-view).
