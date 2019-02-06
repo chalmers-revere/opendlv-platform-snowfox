@@ -23,20 +23,20 @@ services:
     # Relay Envelopes from CID 109 (dlv-device-cangw-snowfox) to CID 111.
     relay-109-111:
         container_name: forward-109-111
-        image: chrberger/cluon-relay-multi:v0.0.1
+        image: chrberger/cluon-relay-multi:v0.0.2
         cpuset: "1"
         restart: always
         network_mode: "host"
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -6 /usr/bin/cluon-relay --cid-from=109 --cid-to=111 --keep=512,513,514,515,516,518,521,523,1046"
+        command: "nice -n -6 /usr/bin/cluon-relay --cid-from=109 --cid-to=111"
 
     ###########################################################################
     # Relay and downsample Envelopes from CID 111 (local CID session on Brick) to CID 110 (for opendlv-vehicle-view).
     relay-downsample-111-110:
         container_name: relay-downsample-111-110
-        image: chrberger/cluon-relay-multi:v0.0.1
+        image: chrberger/cluon-relay-multi:v0.0.2
         cpuset: "2"
         restart: always
         network_mode: "host"
