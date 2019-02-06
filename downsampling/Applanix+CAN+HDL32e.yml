@@ -104,3 +104,21 @@ services:
         entrypoint: ""
         command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=10.42.44.22 --hdl32e_port=2368 --cid=111 --gpstime"
 
+    ###########################################################################
+    # Axis camera.
+    dev-camera-axis0:
+        container_name: dev-camera-opencv
+        image: chalmersrevere/opendlv-device-camera-opencv-multi:v0.0.11
+        cpuset: "5"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-opencv --camera=http://root:pass@10.42.45.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --freq=30 --name.i420=axis0.i420 --name.argb=axis0.argb"
+
