@@ -16,9 +16,39 @@
 
 # Date: 2019-02-06
 
-version: '2'
+version: '2.2'
 
 services:
+    # Monitor netload.
+    monitor-netload:
+        container_name: monitor-netload
+        build:
+            context: .
+            dockerfile: Dockerfile.amd64
+        cpuset: "1"
+        init: true
+        volumes:
+        - .:/data
+        working_dir: /data
+        restart: always
+        network_mode: "host"
+        command: "/usr/bin/monitor-netload.sh enp10s0,enp11s0,enp5s0,enp4s0"
+
+    # Monitor sysload.
+    monitor-sysload:
+        container_name: monitor-sysload
+        build:
+            context: .
+            dockerfile: Dockerfile.amd64
+        cpuset: "1"
+        init: true
+        volumes:
+        - .:/data
+        working_dir: /data
+        restart: always
+        network_mode: "host"
+        command: "/usr/bin/monitor-sysload.sh 1 2 3 4 5 6 7"
+
     ###########################################################################
     # Relay Envelopes from CID 109 (dlv-device-cangw-snowfox) to CID 111.
     relay-109-111:
