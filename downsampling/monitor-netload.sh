@@ -35,7 +35,8 @@ while [ "$RUNNING" == "1" ]; do
     sleep 1
 done
 
-for i in $@ ; do
+NICS=$(echo $@ | sed -e 's/,/\ /g')
+for i in $NICS ; do
     MATCH="/.*;$i;.*/!d"
     cat ${FILENAME} | sed -e ${MATCH} > ${FILENAME}-${i}
     PROGRAM=$(cat ${FILENAME}-${i} |head -1|cut -f4 -d";")
