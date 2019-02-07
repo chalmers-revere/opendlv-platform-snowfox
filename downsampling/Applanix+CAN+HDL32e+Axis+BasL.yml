@@ -206,6 +206,6 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --cid=111 --id=1 --name=basler1.i420 --width=2048 --height=1536 --recsuffix=basler1"
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --cid=111 --id=1 --name=basler1.i420 --width=2048 --height=1536 --recsuffix=basler1-lossless"
 
 
