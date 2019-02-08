@@ -1,0 +1,91 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-02-06
+
+version: '2.2'
+
+services:
+    # Monitor netload.
+    monitor-netload:
+        container_name: monitor-netload
+        build:
+            context: .
+            dockerfile: Dockerfile.amd64
+        cpuset: "1"
+        init: true
+        volumes:
+        - /run/media/brick/RevereData1/brick/recordings:/recordings
+        working_dir: /recordings
+        restart: always
+        network_mode: "host"
+        command: "/usr/bin/monitor-netload.sh enp10s0,enp11s0,enp5s0,enp4s0"
+
+    # Monitor sysload.
+    monitor-sysload:
+        container_name: monitor-sysload
+        build:
+            context: .
+            dockerfile: Dockerfile.amd64
+        cpuset: "1"
+        init: true
+        pid: "host"
+        volumes:
+        - /run/media/brick/RevereData1/brick/recordings:/recordings
+        working_dir: /recordings
+        restart: always
+        network_mode: "host"
+        command: "/usr/bin/monitor-sysload.sh 1 2 3 4 5 6 7"
+
+    ###########################################################################
+    # Basler.
+    dev-camera-basler1:
+        container_name: dev-camera-basler1
+        build:
+            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
+            dockerfile: Dockerfile.amd64
+        cpuset: "6"
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=1024 --height=768 --offsetX=640 --offsetY=400 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb "
+
+    x264-ll-rec-basler1:
+        container_name: x264-lossless-recorder-basler1
+        build:
+            context: https://github.com/chalmers-revere/opendlv-video-x264-recorder.git#v0.0.2
+            dockerfile: Dockerfile.amd64
+        cpuset: "7"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - /run/media/brick/RevereData1/brick/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/opendlv-video-x264-recorder --id=1 --name=basler1.i420 --width=1024 --height=768 --recsuffix=basler1-lossless --verbose"
+
+
