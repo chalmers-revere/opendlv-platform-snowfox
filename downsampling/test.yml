@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# Date: 2019-02-06
+# Date: 2019-02-11
 
 version: '2.2'
 
@@ -28,7 +28,7 @@ services:
         cpuset: "1"
         init: true
         volumes:
-        - /run/media/brick/RevereData1/brick/recordings:/recordings
+        - /brick/brick/recordings:/recordings
         working_dir: /recordings
         restart: always
         network_mode: "host"
@@ -44,7 +44,7 @@ services:
         init: true
         pid: "host"
         volumes:
-        - /run/media/brick/RevereData1/brick/recordings:/recordings
+        - /brick/brick/recordings:/recordings
         working_dir: /recordings
         restart: always
         network_mode: "host"
@@ -78,18 +78,18 @@ services:
 
     ###########################################################################
     # Dump all containers from CID 111.
-    record-111:
-        container_name: record-111
-        image: chrberger/cluon-amd64:latest
-        cpuset: "1"
-        restart: always
-        network_mode: "host"
-        volumes:
-        - /run/media/brick/RevereData1/brick/recordings:/recordings
-        working_dir: /recordings
-        cap_add:
-        - SYS_NICE
-        command: sh -c "nice -n -7 cluon-OD4toStdout --cid=111 > `date +CID-111-recording-%Y-%m-%d_%H%M%S.rec`"
+#    record-111:
+#        container_name: record-111
+#        image: chrberger/cluon-amd64:latest
+#        cpuset: "1"
+#        restart: always
+#        network_mode: "host"
+#        volumes:
+#        - /brick/brick/recordings:/recordings
+#        working_dir: /recordings
+#        cap_add:
+#        - SYS_NICE
+#        command: sh -c "nice -n -7 cluon-OD4toStdout --cid=111 > `date +CID-111-recording-%Y-%m-%d_%H%M%S.rec`"
 
     ###########################################################################
     # opendlv-vehicle-view on 110.
@@ -100,7 +100,7 @@ services:
         restart: always
         network_mode: "host"
         volumes:
-        - ~/recordings:/opt/vehicle-view/recordings
+        - /brick/brick/recordings:/opt/vehicle-view/recordings
         - /var/run/docker.sock:/var/run/docker.sock
         environment:
         - OD4SESSION_CID=110
@@ -180,7 +180,7 @@ services:
 #        network_mode: "host"
 #        volumes:
 #        - /tmp:/tmp
-#        - /run/media/brick/RevereData1/brick/recordings:/recordings
+#        - /brick/brick/recordings:/recordings
 #        working_dir: /recordings
 #        cap_add:
 #        - SYS_NICE
@@ -219,7 +219,7 @@ services:
 #        network_mode: "host"
 #        volumes:
 #        - /tmp:/tmp
-#        - /run/media/brick/RevereData1/brick/recordings:/recordings
+#        - /brick/brick/recordings:/recordings
 #        working_dir: /recordings
 #        cap_add:
 #        - SYS_NICE
