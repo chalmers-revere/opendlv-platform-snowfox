@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+    # CAN interface to access Snowfox.
+    # (readonly, add --disablereadonly to allow writing to CAN).
+    dlv-cangw-snowfox:
+        container_name: dlv-cangw-snowfox
+        image: $DOCKER_IMAGE_PROXY_XC90
+        cpuset: "1"
+        restart: on-failure
+        network_mode: "host"
+        privileged: true
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 /usr/bin/dlv-device-cangw-snowfox --cid=109 --can=can0"
