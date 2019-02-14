@@ -1,9 +1,9 @@
 #!/bin/sh
 
-#sudo ethtool --set-eee enp4s0 eee off
-#sudo ethtool --set-eee enp5s0 eee off
-#sudo ethtool --set-eee enp10s0 eee off
-#sudo ethtool --set-eee enp11s0 eee off
+sudo ethtool --set-eee enp4s0 eee off
+sudo ethtool --set-eee enp5s0 eee off
+sudo ethtool --set-eee enp10s0 eee off
+sudo ethtool --set-eee enp11s0 eee off
 
 sudo ifconfig enp4s0 down
 sudo ifconfig enp5s0 down

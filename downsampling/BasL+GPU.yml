@@ -37,24 +37,22 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -8 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=2048 --height=1536 --offsetX=0 --offsetY=0 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb"
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=2048 --height=1536 --packetsize=9000 --offsetX=0 --offsetY=0 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb"
         runtime: runc
 
     nvenc-h264-ll-rec-basler1:
         container_name: nvenc-h264-ll-rec-basler1
         image: nvenc-h264:latest
+        depends_on:
+        - dev-camera-basler1
         cpuset: "7"
+        init: true
         restart: always
         ipc: "host"
-        privileged: true
-        network_mode: "host"
         volumes:
         - /tmp:/tmp
         - $HOME/recordings:/recordings
         working_dir: /recordings
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -7 /usr/bin/video-nvenc-h264-recorder --id=1 --name=basler1.i420 --width=2048 --height=1536 --recsuffix=basler1-lossless --verbose"
+        command: "--name=basler1.i420 --width=2048 --height=1536 --recsuffix=basler1-lossless --verbose"
         runtime: nvidia
 

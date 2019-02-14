@@ -30,7 +30,7 @@ FILENAME=$(echo ${FILENAME} | sed -e 's/\://g')
 while [ "$RUNNING" == "1" ]; do
     netload=$(bmon -p $@ -o 'format:fmt=$(element:name)%RX:%$(attr:rxrate:bytes)%TX:%$(attr:txrate:bytes)\n;quitafter=2')
     ts=$(date +%s%N)
-    echo "${netload}" | sed -e "s/enp/${ts};enp/" | sed -e "s/%/\;/g" | grep -v "RX:;0.00;TX:;0.00" | tee -a ${FILENAME}
+    echo "${netload}" | sed -e "s/enp/${ts};enp/" | sed -e "s/%/\;/g" | grep -v "RX:;0.00;TX:;0.00" >> ${FILENAME}
 
     sleep 1
 done
