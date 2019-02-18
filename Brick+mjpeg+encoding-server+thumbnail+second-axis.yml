@@ -227,7 +227,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis0.i420 --width=1280 --height=720 --id=0 --bitrate=3000 --downsample=6 --verbose"
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis0.i420 --width=1280 --height=720 --id=0 --bitrate=3000 --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=6 --verbose"
         runtime: runc
 
     ###########################################################################
@@ -280,7 +280,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis2.i420 --width=1280 --height=720 --id=2 --bitrate=3000 --downsample=6 --verbose"
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis0.i420 --width=1280 --height=720 --id=2 --bitrate=3000 --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=6 --verbose"
         runtime: runc
 
     ###########################################################################
@@ -352,6 +352,6 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=basler1.i420 --width=2048 --height=1536 --id=1 --bitrate=3000 --downsample=3 --verbose"
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=basler1.i420 --width=2048 --height=1536 --id=1 --bitrate=3000 --crop.x=704 --crop.y=500 --crop.width=640 --crop.height=480 --downsample=3 --verbose"
         runtime: runc
 
