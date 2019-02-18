@@ -216,7 +216,7 @@ services:
 
     qsv-h264-thumbnail-axis0:
         container_name: qsv-h264-thumbnail-axis0
-        image: chrberger/video-qsv-h264-encoder:v0.0.2
+        image: chrberger/video-qsv-h264-encoder:v0.0.3
         depends_on:
         - dev-camera-axis0
         cpuset: "6"
@@ -272,7 +272,7 @@ services:
 
     qsv-h264-thumbnail-axis2:
         container_name: qsv-h264-thumbnail-axis2
-        image: chrberger/video-qsv-h264-encoder:v0.0.2
+        image: chrberger/video-qsv-h264-encoder:v0.0.3
         depends_on:
         - dev-camera-axis2
         cpuset: "6"
@@ -286,7 +286,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis2.i420 --width=1280 --height=720 --id=2 --bitrate=3000 --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=3"
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis2.i420 --width=1280 --height=720 --id=2 --bitrate=3000 --flip --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=3"
         runtime: runc
 
     ###########################################################################
