@@ -163,7 +163,7 @@ services:
     ###########################################################################
     # Axis camera.
     dev-camera-axis0:
-        container_name: dev-camera-opencv
+        container_name: dev-camera-axis0
         image: chalmersrevere/opendlv-device-mjpeg-over-http-multi:v0.0.4
         cpuset: "5"
         restart: always
@@ -176,7 +176,7 @@ services:
         cap_add:
         - SYS_NICE
         entrypoint: ""
-        command: "nice -n -8 /usr/bin/opendlv-device-mjpeg-over-http --url=http://root:pass@10.42.45.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --name.i420=axis0.i420 --name.argb=axis0.argb"
+        command: "nice -n -8 /usr/bin/opendlv-device-mjpeg-over-http --url=http://10.42.45.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --name.i420=axis0.i420 --name.argb=axis0.argb"
         runtime: runc
 
     nvenc-h264-ll-rec-server-axis0:
