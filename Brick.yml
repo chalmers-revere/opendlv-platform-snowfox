@@ -213,25 +213,30 @@ services:
         command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis0.i420 --width=1280 --height=720 --id=0 --bitrate=3000 --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=3"
         runtime: runc
 
-#    nvenc-h264-ll-rec-axis0:
-#        container_name: nvenc-h264-ll-rec-axis0
-#        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
-#        depends_on:
-#        - dev-camera-axis0
-#        cpuset: "6"
-#        restart: always
-#        ipc: "host"
-#        network_mode: "host"
-#        volumes:
-#        - /tmp:/tmp
-#        - $HOME/recordings:/recordings
-#        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
-#        working_dir: /recordings
-#        cap_add:
-#        - SYS_NICE
-#        entrypoint: ""
-#        command: "nice -n -7 /usr/bin/video-nvenc-h264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --recsuffix=-axis0-lossless --cid=111 --remote"
-#        runtime: nvidia
+    nvenc-h264-ll-rec-axis0:
+        container_name: nvenc-h264-ll-rec-axis0
+        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
+        depends_on:
+        - dev-camera-axis0
+        cpuset: "6"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        - /usr/lib64/libnvcuvid.so:/usr/lib/x86_64-linux-gnu/libnvcuvid.so
+        - /usr/lib64/libnvcuvid.so.1:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
+        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
+        - /usr/lib64/libnvidia-encode.so:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so
+        - /usr/lib64/libnvidia-encode.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1
+        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/video-nvenc-h264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --recsuffix=-axis0-lossless --cid=111 --remote"
+        runtime: nvidia
 
 
     ###########################################################################
