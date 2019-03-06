@@ -106,9 +106,7 @@ services:
         volumes:
         - $HOME/recordings:/recordings
         working_dir: /recordings
-        cap_add:
-        - SYS_NICE
-        command: sh -c "nice -n -7 /usr/bin/cluon-record --cid=111 --remote --recsuffix=-all"
+        command: "--cid=111 --remote --recsuffix=-all"
         runtime: runc
 
     ###########################################################################
@@ -120,7 +118,7 @@ services:
         restart: always
         network_mode: "host"
         volumes:
-        - $HOME/recordings:/recordings
+        - $HOME/recordings:/opt/vehicle-view/recordings
         - /var/run/docker.sock:/var/run/docker.sock
         environment:
         - OD4SESSION_CID=110
