@@ -225,11 +225,7 @@ services:
         volumes:
         - /tmp:/tmp
         - $HOME/recordings:/recordings
-        - /usr/lib64/libnvcuvid.so:/usr/lib/x86_64-linux-gnu/libnvcuvid.so
-        - /usr/lib64/libnvcuvid.so.1:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.1
         - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
-        - /usr/lib64/libnvidia-encode.so:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so
-        - /usr/lib64/libnvidia-encode.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1
         - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
         working_dir: /recordings
         cap_add:
