@@ -275,22 +275,21 @@ services:
         command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=basler1.i420 --width=2048 --height=1536 --id=1 --bitrate=3000 --crop.x=704 --crop.y=500 --crop.width=640 --crop.height=480 --downsample=1"
         runtime: runc
 
-#    nvenc-h264-ll-rec-basler1:
-#        container_name: nvenc-h264-ll-rec-basler1
-#        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
-#        depends_on:
-#        - dev-camera-basler1
-#        cpuset: "6"
-#        init: true
-#        restart: always
-#        ipc: "host"
-#        network_mode: "host"
-#        volumes:
-#        - /tmp:/tmp
-#        - $HOME/recordings:/recordings
-#        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
-#        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
-#        working_dir: /recordings
-#        command: "--name=basler1.i420 --id=1 --width=2048 --height=1536 --recsuffix=-basler1-lossless --cid=111 --remote"
-#        runtime: nvidia
-
+    nvenc-h264-ll-rec-basler1:
+        container_name: nvenc-h264-ll-rec-basler1
+        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
+        depends_on:
+        - dev-camera-basler1
+        cpuset: "6"
+        init: true
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
+        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
+        working_dir: /recordings
+        command: "--name=basler1.i420 --id=1 --width=2048 --height=1536 --recsuffix=-basler1-lossless --cid=111 --remote"
+        runtime: nvidia
