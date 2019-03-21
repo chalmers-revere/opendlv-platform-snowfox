@@ -1,0 +1,351 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-03-05
+
+version: '2.3'
+
+# These services run on Brick.
+services:
+    # Monitor netload.
+    monitor-netload:
+        container_name: monitor-netload
+        build:
+            context: .
+            dockerfile: Dockerfile.amd64
+        cpuset: "0"
+        init: true
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        restart: always
+        network_mode: "host"
+        command: "/usr/bin/monitor-netload.sh enp10s0,enp11s0,enp5s0,enp4s0"
+        runtime: runc
+
+    # Monitor sysload.
+    monitor-sysload:
+        container_name: monitor-sysload
+        build:
+            context: .
+            dockerfile: Dockerfile.amd64
+        cpuset: "0"
+        init: true
+        pid: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        restart: always
+        network_mode: "host"
+        command: "/usr/bin/monitor-sysload.sh 1 2 3 4 5 6 7"
+        runtime: runc
+
+    ###########################################################################
+    # Relay Envelopes from CID 109 (dlv-device-cangw-snowfox) to CID 111 via TCP.
+    relay-receive-from-109:
+        container_name: relay-receive-from-109
+        image: chrberger/cluon-relay-multi:v0.0.4
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -6 /usr/bin/cluon-relay --cid-to=111 --via-tcp=10.42.42.1:55109"
+        runtime: runc
+
+    ###########################################################################
+    # Relay and downsample Envelopes from CID 111 (local CID session on Brick) to CID 110 (for opendlv-vehicle-view).
+    relay-downsample-111-110:
+        container_name: relay-downsample-111-110
+        image: chrberger/cluon-relay-multi:v0.0.4
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=111 --cid-to=110 --downsample=19:10,49:1,1046:10"
+        runtime: runc
+
+    ###########################################################################
+    # Relay cluon.data.RecorderCommand.
+    relay-recordercommand-110-111:
+        container_name: relay-recordercommand-110-111
+        image: chrberger/cluon-relay-multi:v0.0.4
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=110 --cid-to=111 --keep=11"
+        runtime: runc
+
+    ###########################################################################
+    # Dump all containers from CID 111 on request.
+    record-111:
+        container_name: record-111
+        image: chrberger/cluon-record-multi:v0.0.1
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        command: "--cid=111 --remote --recsuffix=-all"
+        runtime: runc
+
+    ###########################################################################
+    # opendlv-vehicle-view on 110.
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.60
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 node index.js"
+        runtime: runc
+
+    ###########################################################################
+    # Applanix Ethernet Realtime port on 111.
+    dev-gps-pos-rt:
+        container_name: dev-gps-pos-rt
+        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
+        cpuset: "4"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -5 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5602 --cid=111 --id=0"
+        runtime: runc
+
+    # Applanix Ethernet Loggin port on 111.
+#    dev-gps-pos-log:
+#        container_name: dev-gps-pos-log
+#        image: chalmersrevere/opendlv-device-gps-pos-multi:v0.0.11
+#        cpuset: "5"
+#        restart: always
+#        network_mode: "host"
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -4 /usr/bin/opendlv-device-gps-pos --pos_ip=10.42.42.40 --pos_port=5603 --cid=111 --id=0"
+#        runtime: runc
+
+    ###########################################################################
+    # Velodyne HDL32 Lidar on 111.
+#    dev-lidar-hdl32e:
+#        container_name: dev-lidar-hdl32e
+#        image: chalmersrevere/opendlv-device-lidar-hdl32e-multi:v0.0.14
+#        cpuset: "3"
+#        restart: always
+#        network_mode: "host"
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -7 /usr/bin/opendlv-device-lidar-hdl32e --hdl32e_ip=10.42.44.22 --hdl32e_port=2368 --cid=111 --gpstime"
+#        runtime: runc
+
+    ###########################################################################
+    # Axis camera including recording functionality with remote start/stop.
+    dev-camera-axis0:
+        container_name: dev-camera-axis0
+        image: chalmersrevere/opendlv-device-camera-mjpegoverhttp-multi:v0.0.2
+        cpuset: "5"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-mjpegoverhttp --url=http://10.42.45.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg --width=1280 --height=720 --name.i420=axis0.i420 --name.argb=axis0.argb --cid=111 --remote --recsuffix=-axis0-jpeg"
+        runtime: runc
+
+    qsv-h264-thumbnail-axis0:
+        container_name: qsv-h264-thumbnail-axis0
+        image: chrberger/video-qsv-h264-encoder:v0.0.4
+        depends_on:
+        - dev-camera-axis0
+        cpuset: "6"
+        devices:
+        - /dev/dri/renderD128
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis0.i420 --width=1280 --height=720 --id=0 --bitrate=3000 --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=3"
+        runtime: runc
+
+#    nvenc-h264-ll-rec-axis0:
+#        container_name: nvenc-h264-ll-rec-axis0
+#        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
+#        depends_on:
+#        - dev-camera-axis0
+#        cpuset: "6"
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        - $HOME/recordings:/recordings
+#        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
+#        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
+#        working_dir: /recordings
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -7 /usr/bin/video-nvenc-h264-recorder --id=0 --name=axis0.i420 --width=1280 --height=720 --recsuffix=-axis0-lossless --cid=111 --remote"
+#        runtime: nvidia
+
+
+    ###########################################################################
+    # Basler.
+#    dev-camera-basler1:
+#        container_name: dev-camera-basler1
+#        build:
+#            context: https://github.com/chalmers-revere/opendlv-device-camera-pylon.git#v0.0.1
+#            dockerfile: Dockerfile.amd64
+#        cpuset: "7"
+#        restart: always
+#        network_mode: "host"
+#        ipc: "host"
+#        environment:
+#        - DISPLAY=$DISPLAY
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -8 /usr/bin/opendlv-device-camera-pylon --camera=0 --width=2048 --height=1536 --packetsize=9000 --offsetX=0 --offsetY=0 --fps=15 --name.i420=basler1.i420 --name.argb=basler1.argb"
+#        runtime: runc
+
+#    qsv-h264-thumbnail-basler1:
+#        container_name: qsv-h264-thumbnail-basler1
+#        image: chrberger/video-qsv-h264-encoder:v0.0.4
+#        depends_on:
+#        - dev-camera-basler1
+#        cpuset: "6"
+#        devices:
+#        - /dev/dri/renderD128
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=basler1.i420 --width=2048 --height=1536 --id=1 --bitrate=3000 --crop.x=704 --crop.y=500 --crop.width=640 --crop.height=480 --downsample=1"
+#        runtime: runc
+
+#    nvenc-h264-ll-rec-basler1:
+#        container_name: nvenc-h264-ll-rec-basler1
+#        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
+#        depends_on:
+#        - dev-camera-basler1
+#        cpuset: "6"
+#        init: true
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        - $HOME/recordings:/recordings
+#        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
+#        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
+#        working_dir: /recordings
+#        command: "--name=basler1.i420 --id=1 --width=2048 --height=1536 --recsuffix=-basler1-lossless --cid=111 --remote"
+#        runtime: nvidia
+
+    ###########################################################################
+    # BoB.
+#    dev-camera-bob2:
+#        container_name: dev-camera-bob2
+#        image: $DOCKER_IMAGE_DEV_CAMERA_BOB
+#        cpuset: "7"
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        environment:
+#        - DISPLAY=$DISPLAY
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -8 /usr/bin/dlv-device-camera-bob --cid=111 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob2.i420 --name.argb=bob2.argb"
+
+#    qsv-h264-thumbnail-bob2:
+#        container_name: qsv-h264-thumbnail-bob2
+#        image: chrberger/video-qsv-h264-encoder:v0.0.4
+#        depends_on:
+#        - dev-camera-bob2
+#        cpuset: "7"
+#        devices:
+#        - /dev/dri/renderD128
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=bob2.i420 --width=1104 --height=624 --id=2 --bitrate=3000 --crop.x=232 --crop.y=72 --crop.width=640 --crop.height=480 --downsample=5"
+#        runtime: runc
+
+#    nvenc-h264-ll-rec-bob2:
+#        container_name: nvenc-h264-ll-rec-bob2
+#        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
+#        depends_on:
+#        - dev-camera-bob2
+#        cpuset: "7"
+#        restart: always
+#        ipc: "host"
+#        network_mode: "host"
+#        volumes:
+#        - /tmp:/tmp
+#        - $HOME/recordings:/recordings
+#        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
+#        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
+#        working_dir: /recordings
+#        command: "--name=bob2.i420 --id=2 --width=1104 --height=624 --recsuffix=-bob2-lossless --cid=111 --remote"
+#        runtime: nvidia
+
