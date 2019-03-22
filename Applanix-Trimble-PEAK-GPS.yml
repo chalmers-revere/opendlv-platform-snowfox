@@ -73,9 +73,7 @@ services:
         volumes:
         - $HOME/recordings:/recordings
         working_dir: /recordings
-        cap_add:
-        - SYS_NICE
-        command: sh -c "nice -n -7 /usr/bin/cluon-record --cid=111 --remote --recsuffix=-all"
+        command: "--cid=111 --remote --recsuffix=-all"
         runtime: runc
 
     ###########################################################################
@@ -143,15 +141,15 @@ services:
 
     ###########################################################################
     # PEAK GPS.
-    dev-gps-peak:
-        container_name: dev-gps-nmea
-        image: chalmersrevere/opendlv-device-gps-peak-amd64:v0.0.8
-        cpuset: "7"
-        privileged: true
-        restart: always
-        network_mode: "host"
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -3 /usr/bin/opendlv-device-gps-peak --cid=111 --id=2 --can=can0"
+#    dev-gps-peak:
+#        container_name: dev-gps-nmea
+#        image: chalmersrevere/opendlv-device-gps-peak-amd64:v0.0.8
+#        cpuset: "7"
+#        privileged: true
+#        restart: always
+#        network_mode: "host"
+#        cap_add:
+#        - SYS_NICE
+#        entrypoint: ""
+#        command: "nice -n -3 /usr/bin/opendlv-device-gps-peak --cid=111 --id=2 --can=can0"
 
