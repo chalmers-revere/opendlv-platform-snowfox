@@ -1,0 +1,65 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-02-17
+
+version: '2.3'
+
+# These services run on the GoldenPC.
+services:
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.60
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 node index.js"
+        runtime: runc
+
+#    dev-ps3controller:
+#        container_name: dev-ps3controller
+#        image: chalmersrevere/opendlv-device-gamepad-multi:v0.0.10
+#        restart: on-failure
+#        network_mode: "host"
+#        devices:
+#        - "/dev/input/js0:/dev/input/js0"
+#        command: "--device=/dev/input/js0 --axis_leftright=0 --axis_updown=3 --freq=100 --acc_min=0 --acc_max=50 --dec_min=0 --dec_max=-10 --steering_min=-10 --steering_max=10 --steering_max_rate=2.0 --cid=110"
+
+    dlv-cangw-snowfox:
+        container_name: dlv-cangw-snowfox
+        image: $DOCKER_IMAGE_PROXY_XC90
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        privileged: true
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 /usr/bin/dlv-device-cangw-snowfox --cid=110 --can=can0 --disablereadonly"
+        runtime: runc
+
