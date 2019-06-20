@@ -49,6 +49,20 @@ services:
         runtime: runc
 
     ###########################################################################
+    # Relay cluon.data.RecorderCommand.
+    relay-recordercommand-110-111:
+        container_name: relay-recordercommand-110-111
+        image: chrberger/cluon-relay-multi:v0.0.4
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=110 --cid-to=111 --keep=11"
+        runtime: runc
+
+    ###########################################################################
     # Dump all containers from CID 111.
     record-111:
         container_name: record-111
@@ -68,7 +82,7 @@ services:
     # opendlv-vehicle-view on 110.
     vehicle-view:
         container_name: opendlv-vehicle-view
-        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.57
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.60
         cpuset: "1"
         restart: always
         network_mode: "host"
@@ -168,3 +182,17 @@ services:
         - SYS_NICE
         entrypoint: ""
         command: "nice -n -8 /usr/bin/dlv-device-camera-bob --cid=111 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob2.i420 --name.argb=bob2.argb"
+
+    dev-radar-meas-front-center:
+        container_name: dev-radar-meas-front-center
+        image: $DOCKER_IMAGE_DEV_RADAR_MEAS
+        cpuset: "6"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: "/recordings"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-radar-meas --cid=111 --id=0 --meas_ip=192.168.242.255 --meas_port=47000 --recsuffix=-radar-front-center"
