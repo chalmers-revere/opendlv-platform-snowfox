@@ -33,6 +33,7 @@ services:
         - SYS_NICE
         entrypoint: ""
         command: "nice -n -1 /usr/bin/dlv-device-cangw-snowfox --cid=109 --can=can0"
+        #command: "nice -n -1 /usr/bin/dlv-device-cangw-snowfox --cid=109 --can=can0 --disablereadonly"
         runtime: runc
 
     relay-serve-from-109:
