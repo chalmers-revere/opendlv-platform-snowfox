@@ -1,0 +1,61 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-03-05
+
+version: '2.3'
+
+# These services run on Brick.
+services:
+    ###########################################################################
+    # opendlv-vehicle-view on 110.
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.60
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 node index.js"
+        runtime: runc
+
+    qsv-h264-thumbnail-basler1:
+        container_name: qsv-h264-thumbnail-basler1
+        image: chrberger/video-qsv-h264-encoder:v0.0.4
+        cpuset: "6"
+        devices:
+        - /dev/dri/renderD128
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=basler1.i420 --width=2048 --height=1536 --id=1 --bitrate=3000 --crop.x=704 --crop.y=500 --crop.width=640 --crop.height=480 --downsample=1"
+        runtime: runc

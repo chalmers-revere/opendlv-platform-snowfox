@@ -1,0 +1,140 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-03-05
+
+version: '2.3'
+
+# These services run on Brick.
+services:
+    ###########################################################################
+    # Relay and downsample Envelopes from CID 111 (local CID session on Brick) to CID 110 (for opendlv-vehicle-view).
+    relay-downsample-111-110:
+        container_name: relay-downsample-111-110
+        image: chrberger/cluon-relay-multi:v0.0.4
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=111 --cid-to=110 --downsample=19:10,49:1,1046:10"
+        runtime: runc
+
+    ###########################################################################
+    # Relay cluon.data.RecorderCommand.
+    relay-recordercommand-110-111:
+        container_name: relay-recordercommand-110-111
+        image: chrberger/cluon-relay-multi:v0.0.4
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/cluon-relay --cid-from=110 --cid-to=111 --keep=11"
+        runtime: runc
+
+    ###########################################################################
+    # Dump all containers from CID 111 on request.
+    record-111:
+        container_name: record-111
+        image: chrberger/cluon-record-multi:v0.0.1
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        command: "--cid=111 --remote --recsuffix=-all"
+        runtime: runc
+
+    ###########################################################################
+    # opendlv-vehicle-view on 110.
+    vehicle-view:
+        container_name: opendlv-vehicle-view
+        image: chalmersrevere/opendlv-vehicle-view-multi:v0.0.60
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/opt/vehicle-view/recordings
+        - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+        - OD4SESSION_CID=110
+        - PLAYBACK_OD4SESSION_CID=210
+        - OPENDLV_VEHICLE_VIEW_PLATFORM=Snowfox
+        ports:
+        - "8081:8081"
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -1 node index.js"
+        runtime: runc
+
+    ###########################################################################
+    # Right PtGrey camera --> check serial number!!
+    device-camera-ptgrey-amd64-right:
+        container_name: dlv-ptgrey-right
+        image: ptgrey:v11
+        cpuset: "6"
+        restart: always
+        network_mode: "host"
+        ipc: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-spinnaker --camera=3 --width=2048 --height=1536 --name.i420=ptg-right.i420 --name.argb=ptg-right.argb"
+
+    qsv-h264-thumbnail-ptgrey-right:
+        container_name: qsv-h264-thumbnail-ptgrey-right
+        image: chrberger/video-qsv-h264-encoder:v0.0.4
+        depends_on:
+        - device-camera-ptgrey-amd64-right
+        cpuset: "7"
+        devices:
+        - /dev/dri/renderD128
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --name=ptg-right.i420 --width=2048 --height=1536 --bitrate=3000 --crop.x=704 --crop.y=500 --crop.width=640 --crop.height=480 --downsample=2 --cid=110 --id=2"
+        runtime: runc
+
+    nvenc-h264-ll-rec-ptgrey-right:
+        container_name: nvenc-h264-ll-rec-ptgrey-right
+        image: chrberger/video-nvenc-h264-recorder-amd64:cuda10-v0.0.2
+        depends_on:
+        - device-camera-ptgrey-amd64-right
+        cpuset: "7"
+        init: true
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        volumes:
+        - /tmp:/tmp
+        - $HOME/recordings:/recordings
+        - /usr/lib64/libnvcuvid.so.415.27:/usr/lib/x86_64-linux-gnu/libnvcuvid.so.415.27
+        - /usr/lib64/libnvidia-encode.so.415.27:/usr/lib/x86_64-linux-gnu/libnvidia-encode.so.415.27
+        working_dir: /recordings
+        command: "--name=ptg-right.i420 --width=2048 --height=1536 --recsuffix=-ptgrey-right-lossless --remote --cid=111 --id=2"
+        runtime: nvidia
