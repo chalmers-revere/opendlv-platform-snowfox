@@ -49,22 +49,6 @@ services:
         runtime: runc
 
     ###########################################################################
-    # Dump all containers from CID 111.
-    record-111:
-        container_name: record-111
-        image: chrberger/cluon-record-multi:v0.0.1
-        cpuset: "1"
-        restart: always
-        network_mode: "host"
-        volumes:
-        - $HOME/recordings:/recordings
-        working_dir: /recordings
-        cap_add:
-        - SYS_NICE
-        command: "--remote --recsuffix=-all --cid=111"
-        runtime: runc
-
-    ###########################################################################
     # Relay cluon.data.RecorderCommand.
     relay-recordercommand-110-111:
         container_name: relay-recordercommand-110-111
@@ -159,40 +143,17 @@ services:
     # Axis camera including recording functionality with remote start/stop.
     dev-camera-axis0:
         container_name: dev-camera-axis0
-        image: chalmersrevere/opendlv-device-camera-mjpegoverhttp-multi:v0.0.3
+        image: chalmersrevere/opendlv-device-camera-rtp-amd64:2file
         cpuset: "5"
         restart: always
-        ipc: "host"
         network_mode: "host"
         volumes:
-        - /tmp:/tmp
         - $HOME/recordings:/recordings
         working_dir: /recordings
         cap_add:
         - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -8 /usr/bin/opendlv-device-camera-mjpegoverhttp --url=http://10.42.45.50/axis-cgi/mjpg/video.cgi\\?channel=0\\&.mjpg\\&compression=0 --width=1280 --height=720 --name.i420=axis0.i420 --name.argb=axis0.argb --skip.argb --remote --recsuffix=-jpeg --cid=111"
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-rtp --url=rtsp://10.42.45.50/axis-media/media.amp\\?camera=1 --cid=111 --id=0 --client-port-udp-a=35000 --remote --recsuffix=-all"
         runtime: runc
-
-    qsv-h264-thumbnail-axis0:
-        container_name: qsv-h264-thumbnail-axis0
-        image: chrberger/video-qsv-h264-encoder:v0.0.4
-        depends_on:
-        - dev-camera-axis0
-        cpuset: "6"
-        devices:
-        - /dev/dri/renderD128
-        restart: always
-        network_mode: "host"
-        ipc: "host"
-        volumes:
-        - /tmp:/tmp
-        cap_add:
-        - SYS_NICE
-        entrypoint: ""
-        command: "nice -n -7 /usr/bin/video-qsv-h264-encoder --cid=110 --name=axis0.i420 --width=1280 --height=720 --id=0 --bitrate=3000 --crop.x=320 --crop.y=120 --crop.width=640 --crop.height=480 --downsample=3"
-        runtime: runc
-
 
     ###########################################################################
     # Basler.
