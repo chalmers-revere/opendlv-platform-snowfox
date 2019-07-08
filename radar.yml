@@ -1,0 +1,92 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-07-08
+
+version: '2.3'
+
+# These services complement Brick.yml with support for all radars.
+services:
+    ###########################################################################
+    dev-radar-fc:
+        container_name: dev-radar-fc
+        image: $DOCKER_IMAGE_DEV_RADAR_MEAS
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-radar-meas --meas_ip=192.168.242.255 --meas_port=47000 --remote --recsuffix=-radar-front-center --cid=111 --id=0"
+
+    dev-radar-fl:
+        container_name: dev-radar-fl
+        image: $DOCKER_IMAGE_DEV_RADAR_MEAS
+        cpuset: "2"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-radar-meas --meas_ip=192.168.241.255 --meas_port=47000 --remote --recsuffix=-radar-front-left --cid=111 --id=1"
+
+    dev-radar-fr:
+        container_name: dev-radar-fr
+        image: $DOCKER_IMAGE_DEV_RADAR_MEAS
+        cpuset: "3"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-radar-meas --meas_ip=192.168.244.255 --meas_port=47002 --remote --recsuffix=-radar-front-right --cid=111 --id=2"
+
+    dev-radar-rl:
+        container_name: dev-radar-rl
+        image: $DOCKER_IMAGE_DEV_RADAR_MEAS
+        cpuset: "4"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-radar-meas --meas_ip=192.168.234.255 --meas_port=47002 --remote --recsuffix=-radar-rear-left --cid=111 --id=3"
+
+    dev-radar-rr:
+        container_name: dev-radar-rr
+        image: $DOCKER_IMAGE_DEV_RADAR_MEAS
+        cpuset: "5"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-radar-meas --meas_ip=192.168.231.255 --meas_port=47000 --remote --recsuffix=-radar-rear-right --cid=111 --id=4"
