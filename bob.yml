@@ -1,0 +1,38 @@
+# Copyright (C) 2019 Christian Berger
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# Date: 2019-07-10
+
+version: '2.3'
+
+# These services run on Brick.
+services:
+    dev-camera-bob2:
+        container_name: dev-camera-bob2
+        image: $DOCKER_IMAGE_DEV_CAMERA_BOB
+        cpuset: "7"
+        restart: always
+        ipc: "host"
+        network_mode: "host"
+        environment:
+        - DISPLAY=$DISPLAY
+        volumes:
+        - /tmp:/tmp
+        cap_add:
+        - SYS_NICE
+        entrypoint: ""
+        command: "nice -n -8 /usr/bin/dlv-device-camera-bob --cid=111 --hostip=192.168.1.1 --bobip=192.168.1.2 --name.i420=bob2.i420 --name.argb=bob2.argb"
+
