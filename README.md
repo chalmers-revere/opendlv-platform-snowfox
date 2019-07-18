@@ -17,7 +17,7 @@ This repository contains information regarding the –
 	- Engine: In-line 4 cylinder Supercharged & Turbocharged engine (306 hp)
 
 - Research-Specific Equipment/System Architecture
-	- Vehicle CAN Gateway for Control
+	- Vehicle CAN Gateway for Control & Vehicle Data
 	- LIDAR: Velodyne HDL32 x 1
 	- GPS-IMU: Applanix POS LV-220 x 1
 	- Cameras:
