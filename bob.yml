@@ -23,7 +23,7 @@ services:
     dev-camera-bob2:
         container_name: dev-camera-bob2
         image: $DOCKER_IMAGE_DEV_CAMERA_BOB
-        cpuset: "7"
+        cpuset: "2,3,4"
         restart: always
         ipc: "host"
         network_mode: "host"
