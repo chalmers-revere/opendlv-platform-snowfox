@@ -87,6 +87,23 @@ services:
 
 
     ###########################################################################
+    # Axis camera including recording functionality with remote start/stop.
+    dev-camera-axis0:
+        container_name: dev-camera-axis0
+        image: chalmersrevere/opendlv-device-camera-rtp-amd64:2file
+        cpuset: "1"
+        restart: always
+        network_mode: "host"
+        volumes:
+        - $HOME/recordings:/recordings
+        working_dir: /recordings
+        cap_add:
+        - SYS_NICE
+        command: "nice -n -8 /usr/bin/opendlv-device-camera-rtp --url=rtsp://10.42.45.50/axis-media/media.amp\\?camera=1 --cid=111 --id=0 --client-port-udp-a=35000 --remote --recsuffix=-all"
+        runtime: runc
+
+
+    ###########################################################################
     # Applanix Ethernet Realtime port on 111.
     dev-gps-pos-rt:
         container_name: dev-gps-pos-rt
