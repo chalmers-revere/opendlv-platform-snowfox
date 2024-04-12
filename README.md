@@ -1,3 +1,5 @@
+Moved to https://git.opendlv.org.
+
 # Repository for REVERE Platform – SNOWFOX
 This repository contains information regarding the –
 
